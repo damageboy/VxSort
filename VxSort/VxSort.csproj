@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <Title>VxSort</Title>
+        <Authors>damageboy</Authors>
+        <Description>Vectorized Sorting for .NET</Description>
+        <Copyright>damageboy</Copyright>
+        <PackageProjectUrl>https://github.com/damageboy/VxSort/</PackageProjectUrl>
+        <License>https://github.com/damageboy/VxSort/blob/master/LICENSE</License>
+	<!-- <PackageIcon>https://raw.githubusercontent.com/damageboy/VxSort/dev/VxSort/vxsort.svg</PackageIcon> -->
+        <RepositoryUrl>https://github.com/damageboy/VxSort/</RepositoryUrl>
+        <PackageTags>sorting intrinsics</PackageTags>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <Nullable>enable</Nullable>
+        <DebugType>portable</DebugType>
+    </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="Fody" />
+      <PackageReference Include="LocalsInit.Fody" />
+      <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" />
+      <PackageReference Include="Microsoft.CodeQuality.Analyzers" />
+      <PackageReference Include="Microsoft.SourceLink.GitHub" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove="vxsort.svg" />
+      <None Update="BitonicSort.Generated.tt">
+        <Generator>TextTemplatingFileGenerator</Generator>
+        <LastGenOutput>BitonicSort.Generated.cs</LastGenOutput>
+      </None>
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Update="BitonicSort.Generated.cs">
+        <DependentUpon>BitonicSort.Generated.tt</DependentUpon>
+      </Compile>
+    </ItemGroup>
+</Project>
