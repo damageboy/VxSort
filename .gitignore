@@ -1,0 +1,10 @@
+obj/
+bin/
+.idea/
+.vscode/
+.vs/
+.ionide/
+Test/reports/
+TestBlog/reports/
+Test/TestResults/
+TestBlog/TestResults/

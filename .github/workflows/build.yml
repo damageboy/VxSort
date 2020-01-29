@@ -1,0 +1,95 @@
+name: Build
+
+on: 
+  push:
+    branches:
+      - master
+
+env:
+  dotnet_version: '3.1.100'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # macos on GH actions doesn't seem to have AVX2 extensions enables CPUs yet?
+        #os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os: [ ubuntu-latest, windows-latest ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Build.targets') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v1.0.2 # Issues with DOTNET_ROOT
+        with:
+          dotnet-version: ${{ env.dotnet_version }}
+
+      - name: Make SDK shut up
+        shell: bash
+        run: touch "~/.dotnet/$(dotnet --version).dotnetFirstUseSentinel"
+
+      - name: Test
+        run: dotnet test -c release Test/Test.csproj
+        shell: bash
+
+
+  publish:
+    needs: build
+
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Build.targets') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+        
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v1.0.2 # Issues with DOTNET_ROOT
+        with:
+          dotnet-version: ${{ env.dotnet_version }}
+
+      - name: Pack NuGet packages (CI versions)
+        if: startsWith(github.ref, 'refs/heads/')
+        shell: bash
+        run: dotnet pack --configuration Release --output nupkgs --version-suffix "ci.$(date -u +%Y%m%dT%H%M%S)+sha.${GITHUB_SHA:0:9}"
+
+      - name: Pack NuGet packages (Release versions)
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: dotnet pack --configuration Release --output nupkgs
+
+      - name: Upload artifacts (nupkg)
+        uses: actions/upload-artifact@v1
+        with:
+          name: VxSort+sha.${{ github.sha }}
+          path: nupkgs
+
+      - name: Publish packages to GitHub Package Registry	
+        env:	
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE: https://nuget.pkg.github.com/damageboy/index.json
+        shell: bash
+        run: |
+          cd nupkgs
+          curl -o nuget -L https://dist.nuget.org/win-x86-commandline/latest/nuget.exe	
+          ./nuget sources add -Name "GitHub" -Source $SOURCE -UserName damageboy -Password $TOKEN	
+          ./nuget push "VxSort.*.nupkg" -Source "GitHub"
+
