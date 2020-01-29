@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>8</LangVersion>
+    <DebugType>pdbonly</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <Configurations>Debug;Release;Stats</Configurations>
+    <NoWarn>CA1810;CA1303;CA2207;NU5105</NoWarn>
+    <Platforms>AnyCPU</Platforms>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <!-- <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile> -->
+  </PropertyGroup>
+</Project>
