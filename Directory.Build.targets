@@ -1,9 +1,4 @@
 <Project>
-  <PropertyGroup Condition="'$(Configuration)' == 'Stats'">
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <DefineConstants>STATS</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Update="Fody" Version="6.0.8">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

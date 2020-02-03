@@ -4,12 +4,11 @@
     <LangVersion>8</LangVersion>
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
-    <Configurations>Debug;Release;Stats</Configurations>
     <NoWarn>CA1810;CA1303;CA2207;NU5105</NoWarn>
     <Platforms>AnyCPU</Platforms>
     <RepositoryBranch>$(GITHUB_REF)</RepositoryBranch>
     <RepositoryCommit>$(GITHUB_SHA)</RepositoryCommit>
-    <VersionPrefix>0.1.3</VersionPrefix>
+    <VersionPrefix>0.1.4</VersionPrefix>
     <!-- <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile> -->
   </PropertyGroup>
 </Project>
