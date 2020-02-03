@@ -4,7 +4,7 @@
 
 <img align="right" width="160px" height="160px" src="vxsort.svg">
 
-VxSort is a repository that contains both the code accompanying the [This goes to Eleven](https://bits.houmus.org/2019-08-18/this-goes-to-eleven-pt1) blog post series by [@damageboy](https://github.com/damageboy/). 
+VxSort is a repository that contains both the code accompanying the [This goes to Eleven](https://bits.houmus.org/2020-01-28/this-goes-to-eleven-pt1) blog post series by [@damageboy](https://github.com/damageboy/). 
 
 In addition, this repository contains the source code for the NuGet package by the same name that provides a ready to use implementation for sorting with managed code at a much higher speeds than what is currently possible with CoreCLR 3.0.
 
