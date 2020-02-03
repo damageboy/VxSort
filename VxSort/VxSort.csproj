@@ -20,8 +20,6 @@
         <RepositoryType>git</RepositoryType>
         <PackageLicenseUrl>https://raw.githubusercontent.com/damageboy/VxSort/master/LICENSE</PackageLicenseUrl>
         <PackageIconUrl>..\vxsort.png</PackageIconUrl>
-        <AssemblyVersion>0.1.2</AssemblyVersion>
-        <PackageVersion>0.1.2</PackageVersion>
     </PropertyGroup>
     <ItemGroup>
       <PackageReference Include="Fody" />

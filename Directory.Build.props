@@ -7,7 +7,9 @@
     <Configurations>Debug;Release;Stats</Configurations>
     <NoWarn>CA1810;CA1303;CA2207;NU5105</NoWarn>
     <Platforms>AnyCPU</Platforms>
-    <VersionPrefix>0.1.0</VersionPrefix>
+    <RepositoryBranch>$(GITHUB_REF)</RepositoryBranch>
+    <RepositoryCommit>$(GITHUB_SHA)</RepositoryCommit>
+    <VersionPrefix>0.1.3</VersionPrefix>
     <!-- <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile> -->
   </PropertyGroup>
 </Project>
