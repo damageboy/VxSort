@@ -71,10 +71,10 @@ namespace Example
                     var loops = totalElements / s;
                     var dups = 1;
 
-                    if (loops > 1000) {
+                    if (loops > 100) {
                         dups  = totalElements / 1000;
-                        dups = Math.Min(dups, 1000);
-                        loops = 1000;
+                        dups = Math.Min(dups, 100);
+                        loops = 100;
                     }
                     Console.Write($"Sorting {type}/{s}({dups})...");
 
