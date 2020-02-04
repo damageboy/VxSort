@@ -21,7 +21,7 @@ namespace TestBlog
     {
         static int NumCycles => int.Parse(Environment.GetEnvironmentVariable("NUM_CYCLES") ?? "10");
 
-        static readonly int[] ArraySizes = { 10, 100, 1_000, 10_000, 100_000, 1_000_000 };
+        static readonly int[] ArraySizes = { 10, 129, 152, 100, 1_000, 10_000, 100_000, 1_000_000 };
 
         static readonly int[] ConstantSeeds = { 666, 333, 999, 314159 };
 
