@@ -19,7 +19,16 @@ namespace Test
             public SortTestCaseData(DataGenerator generator) : base(generator) { }
         }
 
-        static readonly int[] ArraySizes = { 10, 100, 1_000, 10_000, 100_000, 1_000_000 };
+        static readonly int[] ArraySizes = {
+            10, 
+            100, 
+            VectorizedSort.VxUnstableSortInt32.SMALL_SORT_THRESHOLD_ELEMENTS,
+            BitonicSort<int>.MaxBitonicSortSize,
+            1_000, 
+            10_000, 
+            100_000, 
+            1_000_000
+        };
 
         static readonly int[] ConstantSeeds = { 666, 333, 999, 314159 };
 
@@ -27,33 +36,33 @@ namespace Test
             from size in ArraySizes
             from i in Enumerable.Range(0, NumCycles)
             let realSize = size + i
-            select new SortTestCaseData(() => (Enumerable.Range(0, size).ToArray(), Enumerable.Range(0, size).ToArray(), "pre-sorted") ).SetArgDisplayNames($"S{size:0000000}");
+            select new SortTestCaseData(() => (Enumerable.Range(0, realSize).ToArray(), Enumerable.Range(0, realSize).ToArray(), "pre-sorted") ).SetArgDisplayNames($"S{realSize:0000000}");
 
         static IEnumerable<TestCaseData> ReverseSorted =>
             from size in ArraySizes
             from i in Enumerable.Range(0, NumCycles)
             let realSize = size + i
-            select new SortTestCaseData(() => (Enumerable.Range(0, size).Reverse().ToArray(), Enumerable.Range(0, size).ToArray(), "reverse-sorted") ).SetArgDisplayNames($"Ƨ{size:0000000}");
+            select new SortTestCaseData(() => (Enumerable.Range(0, realSize).Reverse().ToArray(), Enumerable.Range(0, realSize).ToArray(), "reverse-sorted") ).SetArgDisplayNames($"Ƨ{realSize:0000000}");
 
         static IEnumerable<TestCaseData> HalfMinValue =>
             from size in ArraySizes
             from seed in ConstantSeeds
             from i in Enumerable.Range(0, NumCycles)
             let realSize = size + i
-            select new SortTestCaseData(() => GenerateData(size, seed, int.MinValue, 0.5)).SetArgDisplayNames($"{size:0000000}/{seed}/0.5min");
+            select new SortTestCaseData(() => GenerateData(realSize, seed, int.MinValue, 0.5)).SetArgDisplayNames($"{realSize:0000000}/{seed}/0.5min");
 
         static IEnumerable<TestCaseData> HalfMaxValue =>
             from size in ArraySizes
             from seed in ConstantSeeds
             from i in Enumerable.Range(0, NumCycles)
             let realSize = size + i
-            select new SortTestCaseData(() => GenerateData(size, seed, int.MaxValue, 0.5)).SetArgDisplayNames($"{size:0000000}/{seed}/0.5max");
+            select new SortTestCaseData(() => GenerateData(realSize, seed, int.MaxValue, 0.5)).SetArgDisplayNames($"{realSize:0000000}/{seed}/0.5max");
 
         static IEnumerable<TestCaseData> AllOnes =>
             from size in ArraySizes
             from i in Enumerable.Range(0, NumCycles)
             let realSize = size + i
-            select new SortTestCaseData(() => (Enumerable.Repeat(1, size).ToArray(), Enumerable.Repeat(1, size).ToArray(), "all-ones") ).SetArgDisplayNames($"1:{size:0000000}");
+            select new SortTestCaseData(() => (Enumerable.Repeat(1, realSize).ToArray(), Enumerable.Repeat(1, realSize).ToArray(), "all-ones") ).SetArgDisplayNames($"1:{realSize:0000000}");
 
         static IEnumerable<TestCaseData> ConstantSeed =>
             from size in ArraySizes
