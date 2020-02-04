@@ -141,7 +141,7 @@ namespace VxSort
             // We need this as a compile time constant
             const int V256_N = 256 / 8 / sizeof(int);
 
-            const int SMALL_SORT_THRESHOLD_ELEMENTS = 112;
+            internal const int SMALL_SORT_THRESHOLD_ELEMENTS = 112;
             const int SLACK_PER_SIDE_IN_ELEMENTS = SLACK_PER_SIDE_IN_VECTORS * V256_N;
             const int UNROLL2_SLACK_PER_SIDE_IN_ELEMENTS = UNROLL2_SIZE_IN_VECTORS  * V256_N;
             const int EIGHTH_SLACK_PER_SIDE_IN_ELEMENTS = V256_N;
@@ -797,27 +797,15 @@ namespace VxSort
                 while (readRight >= readLeft) {
 
                     int* nextPtr;
-                    if (((byte *) readLeft   - (byte *) writeLeft) <=
-                        ((byte *) writeRight - (byte *) readRight)) {
-                        nextPtr   = readLeft;
-                        readLeft += N;
-                    } else {
-                        nextPtr    = readRight;
+                    if (((byte *) writeRight - (byte *) readRight) < N * sizeof(int)) {
+                        nextPtr   =  readRight;
                         readRight -= N;
+                    } else {
+                        nextPtr  =  readLeft;
+                        readLeft += N;
                     }
 
-                    var current = LoadAlignedVector256(nextPtr);
-                    var mask = (uint) MoveMask(CompareGreaterThan(current, P).AsSingle());
-                    current = PermuteVar8x32(current, GetBytePermutationAligned(pBase, mask));
-
-                    Debug.Assert(readLeft - writeLeft   >= N);
-                    Debug.Assert(writeRight - readRight >= N);
-                    Store(writeLeft,  current);
-                    Store(writeRight, current);
-
-                    var popCount = PopCount(mask) << 2;
-                    writeRight = (int *) ((byte *) writeRight - popCount);
-                    writeLeft  = (int *) ((byte *) writeLeft  + (8U << 2) - popCount);
+                    PartitionBlock1V(LoadAlignedVector256(nextPtr), P, pBase, ref writeLeft, ref writeRight);
                 }
 
                 var boundary = writeLeft;
