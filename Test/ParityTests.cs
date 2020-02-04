@@ -20,13 +20,13 @@ namespace Test
         }
 
         static readonly int[] ArraySizes = {
-            10, 
-            100, 
+            10,
+            100,
             VectorizedSort.VxUnstableSortInt32.SMALL_SORT_THRESHOLD_ELEMENTS,
             BitonicSort<int>.MaxBitonicSortSize,
-            1_000, 
-            10_000, 
-            100_000, 
+            1_000,
+            10_000,
+            100_000,
             1_000_000
         };
 

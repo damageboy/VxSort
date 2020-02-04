@@ -6,9 +6,9 @@
     <DebugSymbols>true</DebugSymbols>
     <NoWarn>CA1810;CA1303;CA2207;NU5105</NoWarn>
     <Platforms>AnyCPU</Platforms>
-    <RepositoryBranch>$(GITHUB_REF)</RepositoryBranch>
-    <RepositoryCommit>$(GITHUB_SHA)</RepositoryCommit>
-    <VersionPrefix>0.1.4</VersionPrefix>
-    <!-- <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile> -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <VersionPrefix>0.1.5</VersionPrefix>
   </PropertyGroup>
 </Project>

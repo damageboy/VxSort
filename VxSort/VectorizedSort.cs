@@ -213,12 +213,15 @@ namespace VxSort
             [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             internal void HybridSort(int* left, int* right, long realignHint, int depthLimit)
             {
-                Debug.Assert(left <= right);
+                // In case of bad separation we might encounter a partition size of -1
+                Debug.Assert(left <= right + 1);
 
                 var length = (int) (right - left + 1);
 
                 int* mid;
                 switch (length) {
+
+                    case -1:
                     case 0:
                     case 1:
                         return;
@@ -255,7 +258,7 @@ namespace VxSort
                     _depth--;
                     return;
                 }
-                
+
                 // Detect a whole bunch of bad cases where partitioning
                 // will not do well:
                 // 1. Reverse sorted array
@@ -326,8 +329,8 @@ namespace VxSort
                     Partition1VectorInPlace(left, right, realignHint) :
                     Partition8VectorsInPlace(left, right, realignHint);
 
-                HybridSort(left, sep - 2, realignHint | REALIGN_RIGHT, depthLimit);
-                HybridSort(sep, right, realignHint | REALIGN_LEFT, depthLimit);
+                HybridSort(left,    sep - 1, realignHint | REALIGN_RIGHT, depthLimit);
+                HybridSort(sep + 1, right,   realignHint | REALIGN_LEFT,  depthLimit);
                 _depth--;
             }
 
@@ -535,7 +538,7 @@ namespace VxSort
                 // Shove to pivot back to the boundary
                 var value = *boundary;
                 *right = value;
-                *boundary++ = pivot;
+                *boundary = pivot;
 
                 Debug.Assert(boundary > left);
                 Debug.Assert(boundary <= right);
@@ -628,7 +631,7 @@ namespace VxSort
                 //       for the negation operation, which will also do its share to speed things up while lowering
                 //       the native code size, yay for future me!
                 writeRight = writeRight + pc;
-                writeLeft = writeLeft + pc + V256_N;
+                writeLeft  = writeLeft + pc + V256_N;
             }
 
             /// <summary>
@@ -641,8 +644,6 @@ namespace VxSort
             [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             internal int* Partition1VectorInPlace(int* left, int* right, long hint)
             {
-                Debug.Assert(right - left > SMALL_SORT_THRESHOLD_ELEMENTS);
-
                 Debug.Assert((((ulong) left) & 0x3) == 0);
                 Debug.Assert((((ulong) right) & 0x3) == 0);
                 // Vectorized double-pumped (dual-sided) partitioning:
@@ -820,7 +821,7 @@ namespace VxSort
                 // Shove to pivot back to the boundary
                 var value = *boundary;
                 *right = value;
-                *boundary++ = pivot;
+                *boundary = pivot;
 
                 Debug.Assert(boundary > left);
                 Debug.Assert(boundary <= right);
