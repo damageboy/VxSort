@@ -19,6 +19,10 @@ namespace VxSort
                 throw new ArgumentNullException(nameof(array));
             }
 
+            if (array.Length == 0) {
+                return;
+            }
+
             if (!Avx2.IsSupported) {
                 throw new NotSupportedException($"{nameof(VxSort)} requires x86/AVX2 support in the processor");
             }
