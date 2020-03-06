@@ -2,14 +2,12 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
-using System.Runtime.Intrinsics.X86;
 using VxSortResearch.PermutationTables;
 using VxSortResearch.Statistics;
 using VxSortResearch.Utils;
 using static System.Runtime.Intrinsics.X86.Avx;
 using static System.Runtime.Intrinsics.X86.Avx2;
 using static System.Runtime.Intrinsics.X86.Popcnt;
-using static VxSortResearch.PermutationTables.BitPermTables;
 
 namespace VxSortResearch.Unstable.AVX2.Happy
 {
@@ -35,7 +33,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
         
         static int FloorLog2PlusOne(int n)
         {
-            int result = 0;
+            var result = 0;
             while (n >= 1)
             {
                 result++;
@@ -275,8 +273,12 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 PartitionBlock(left         , P, pBase, ref tmpLeft, ref tmpRight);
                 PartitionBlock(right - N - 1, P, pBase, ref tmpLeft, ref tmpRight);
 
+                int* wow;
+
+
                 var writeLeft = left;
                 var writeRight = right - N - 1;
+                wow += writeRight;
 
                 var readLeft = left + N;
                 var readRight = right - 2*N - 1;
