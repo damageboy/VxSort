@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
@@ -22,7 +23,7 @@ namespace Bench
     {
         public MicroBenchmarksConfig()
         {
-            SummaryStyle = new SummaryStyle(true, SizeUnit.GB, TimeUnit.Nanosecond);
+            SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.GB, TimeUnit.Nanosecond);
             Add(Job.LongRun); //);.With(InProcessEmitToolchain.Instance));
         }
     }

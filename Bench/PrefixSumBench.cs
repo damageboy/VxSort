@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
@@ -6,6 +7,7 @@ using Bench.Utils;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Horology;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Reports;
@@ -18,8 +20,17 @@ namespace Bench
     {
         public PrefixSumConfig()
         {
-            SummaryStyle = new SummaryStyle(true, SizeUnit.GB, TimeUnit.Nanosecond);
-            Add(Job.LongRun); //);.With(InProcessEmitToolchain.Instance));
+            SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.B, TimeUnit.Nanosecond);
+            AddJob(Job.LongRun); //);.With(InProcessEmitToolchain.Instance));
+            AddColumn(SpeedupRatioColumn.SpeedupOfMean);
+            AddColumn(WorthinessRatioColumn.WorthinessOfMean);
+
+            AddDiagnoser(
+                new DisassemblyDiagnoser(
+                    new DisassemblyDiagnoserConfig(
+                        maxDepth: 2, // you can change it to a bigger value if you want to get more framework methods disassembled
+                        exportGithubMarkdown: true)));
+
         }
     }
 

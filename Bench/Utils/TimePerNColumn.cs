@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using BenchmarkDotNet.Columns;
@@ -17,7 +18,7 @@ namespace Bench.Utils
             unit = unit ?? TimeUnit.GetBestTimeUnit(value);
             double unitValue = TimeUnit.Convert(value, TimeUnit.Nanosecond, unit);
             if (showUnit) {
-                string unitName = unit.Name.ToString(encoding ?? Encoding.ASCII).PadLeft(unitNameWidth);
+                string unitName = unit.Name.ToString(NumberFormatInfo.InvariantInfo).PadLeft(unitNameWidth);
                 return $"{unitValue.ToStr(format)} {unitName}";
             }
 
@@ -34,17 +35,8 @@ namespace Bench.Utils
             //     string.Format(System.IFormatProvider, string, object)          // .NET 4.6
             // Unfortunately, Mono doesn't have the second overload (with object instead of params object[]).
             var args = new object[] {value};
-            return string.Format(HostEnvironmentInfo.MainCultureInfo, $"{{0:{format}}}", args);
+            return string.Format($"{{0:{format}}}", args);
         }
-
-        public static string ToTimeStr(this double value, TimeUnit unit, Encoding encoding, string format = "N4",
-            int unitNameWidth = 1, bool showUnit = true)
-            => value.ToTimeStr(unit, unitNameWidth, showUnit, format, encoding);
-
-        public static string ToTimeStr(this double value, Encoding encoding, TimeUnit unit = null, string format = "N4",
-            int unitNameWidth = 1,
-            bool showUnit = true)
-            => value.ToTimeStr(unit, unitNameWidth, showUnit, format, encoding);
     }
 
     public class TimePerNColumn : IColumn
@@ -54,10 +46,7 @@ namespace Bench.Utils
 
         public bool IsDefault(Summary summary, BenchmarkCase benchmarkCase) => false;
 
-        public string GetValue(Summary summary, BenchmarkCase benchmarkCase)
-        {
-            return "";
-        }
+        public string GetValue(Summary summary, BenchmarkCase benchmarkCase) => "";
 
         public bool IsAvailable(Summary summary) => true;
         public bool AlwaysShow => true;
@@ -71,7 +60,7 @@ namespace Bench.Utils
         {
             var valueOfN = (int) benchmarkCase.Parameters.Items.Single(p => p.Name == "N").Value;
             var timePerN = summary[benchmarkCase].ResultStatistics.Mean / valueOfN;
-            return timePerN.ToTimeStr(benchmarkCase.Config.Encoding, TimeUnit.GetBestTimeUnit(timePerN));
+            return timePerN.ToTimeStr(TimeUnit.GetBestTimeUnit(timePerN));
         }
 
         public override string ToString() => ColumnName;

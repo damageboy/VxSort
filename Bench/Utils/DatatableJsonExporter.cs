@@ -7,7 +7,6 @@ using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Exporters;
 using BenchmarkDotNet.Loggers;
 using BenchmarkDotNet.Reports;
-using Microsoft.CodeAnalysis.CSharp;
 using JsonSerializer = Bench.Utils.SimpleJson;
 
 namespace Bench.Utils

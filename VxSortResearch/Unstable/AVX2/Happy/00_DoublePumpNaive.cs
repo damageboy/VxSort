@@ -273,12 +273,8 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 PartitionBlock(left         , P, pBase, ref tmpLeft, ref tmpRight);
                 PartitionBlock(right - N - 1, P, pBase, ref tmpLeft, ref tmpRight);
 
-                int* wow;
-
-
                 var writeLeft = left;
                 var writeRight = right - N - 1;
-                wow += writeRight;
 
                 var readLeft = left + N;
                 var readRight = right - 2*N - 1;

@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Bench.Utils;
@@ -18,7 +19,7 @@ namespace Bench
     {
         public SmallSortConfig()
         {
-            SummaryStyle = new SummaryStyle(true, SizeUnit.GB, TimeUnit.Nanosecond);
+            SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.GB, TimeUnit.Nanosecond);
             Add(Job.LongRun);
             Add(new TimePerNColumn());
         }

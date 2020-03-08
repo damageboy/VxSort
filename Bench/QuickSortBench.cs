@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Net.Http.Headers;
 using Bench.Utils;
 using BenchmarkDotNet.Attributes;
@@ -18,7 +19,7 @@ namespace Bench
     {
         public LongConfig()
         {
-            SummaryStyle = new SummaryStyle(true, SizeUnit.GB, TimeUnit.Microsecond);
+            SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.GB, TimeUnit.Microsecond);
             Add(Job.LongRun);
             Add(new TimePerNColumn());
         }
@@ -28,7 +29,7 @@ namespace Bench
     {
         public MediumConfig()
         {
-            SummaryStyle = new SummaryStyle(true, SizeUnit.GB, TimeUnit.Microsecond);
+            SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.GB, TimeUnit.Microsecond);
             Add(Job.MediumRun);
             Add(new TimePerNColumn());
         }
@@ -38,7 +39,7 @@ namespace Bench
     {
         public ShortConfig()
         {
-            SummaryStyle = new SummaryStyle(true, SizeUnit.GB, TimeUnit.Microsecond);
+            SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.GB, TimeUnit.Microsecond);
             Add(Job.ShortRun);
             Add(new TimePerNColumn());
         }
