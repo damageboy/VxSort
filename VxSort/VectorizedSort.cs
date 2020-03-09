@@ -15,8 +15,13 @@ namespace VxSort
     {
         public static unsafe void UnstableSort<T>(T[] array) where T : unmanaged, IComparable<T>
         {
-            if (array == null)
+            if (array == null) {
                 throw new ArgumentNullException(nameof(array));
+            }
+
+            if (!Avx2.IsSupported) {
+                throw new NotSupportedException($"{nameof(VxSort)} requires x86/AVX2 support in the processor");
+            }
 
             fixed (T* p = &array[0]) {
                 // Yes this looks horrid, but the C# JIT will happily elide
@@ -24,15 +29,17 @@ namespace VxSort
                 if (typeof(T) == typeof(int)) {
                     var left = (int*) p;
                     var sorter = new VxUnstableSortInt32(startPtr: left, endPtr: left + array.Length - 1);
-                    var depthLimit = 2 * FloorLog2PlusOne(array.Length);
-                    sorter.Sort(left, left + array.Length - 1, VxUnstableSortInt32.REALIGN_BOTH, depthLimit);
+                    sorter.Sort();
+                }
+                else {
+                    throw new NotImplementedException($"{nameof(VxSort)} does not yet support {typeof(T).Name}");
                 }
             }
         }
 
-        static int FloorLog2PlusOne(int n)
+        static int FloorLog2PlusOne(uint n)
         {
-            int result = 0;
+            var result = 0;
             while (n >= 1)
             {
                 result++;
@@ -101,11 +108,9 @@ namespace VxSort
             Debug.Assert(lo < keys.Length);
 
             var d = keys[lo + i - 1];
-            while (i <= n / 2)
-            {
+            while (i <= n / 2) {
                 var child = 2 * i;
-                if (child < n && keys[lo + child - 1].CompareTo(keys[lo + child]) < 0)
-                {
+                if (child < n && keys[lo + child - 1].CompareTo(keys[lo + child]) < 0) {
                     child++;
                 }
 
@@ -118,23 +123,35 @@ namespace VxSort
 
             keys[lo + i - 1] = d;
         }
-        const int SMALL_SORT_THRESHOLD_ELEMENTS = 112;
+
+        // How much initial room needs to be made
+        // during setup in full Vector25 units
         const int SLACK_PER_SIDE_IN_VECTORS = 8;
-        const int UNROLL2_SLACK_PER_SIDE_IN_VECTORS = 4;
+
+        // Once we come out of the first unrolled loop
+        // this will be the size of the second unrolled loop.
+        const int UNROLL2_SIZE_IN_VECTORS = 4;
+
+        // Alignment in bytes
         const ulong ALIGN = 32;
         const ulong ALIGN_MASK = ALIGN - 1;
 
-        internal unsafe struct VxUnstableSortInt32
+        internal unsafe ref struct VxUnstableSortInt32
         {
-            const int SLACK_PER_SIDE_IN_ELEMENTS = SLACK_PER_SIDE_IN_VECTORS * 8;
-            const int UNROLL2_SLACK_PER_SIDE_IN_ELEMENTS = UNROLL2_SLACK_PER_SIDE_IN_VECTORS  * 8;
-            const int EIGTH_SLACK_PER_SIDE_IN_ELEMENTS = 8;
+            // We need this as a compile time constant
+            const int V256_N = 256 / 8 / sizeof(int);
+
+            const int SMALL_SORT_THRESHOLD_ELEMENTS = 112;
+            const int SLACK_PER_SIDE_IN_ELEMENTS = SLACK_PER_SIDE_IN_VECTORS * V256_N;
+            const int UNROLL2_SLACK_PER_SIDE_IN_ELEMENTS = UNROLL2_SIZE_IN_VECTORS  * V256_N;
+            const int EIGHTH_SLACK_PER_SIDE_IN_ELEMENTS = V256_N;
+
             // The formula goes like this:
             // 2 x the number of slack elements on each side +
             // 2 x amount of maximal bytes needed for alignment (32)
             // 8 more elements since we write with 8-way stores from both ends of the temporary area
             //   and we must make sure to accidentaly over-write from left -> right or vice-versa right on that edge...
-            const int PARTITION_TMP_SIZE_IN_ELEMENTS = (int) (2 * SLACK_PER_SIDE_IN_ELEMENTS + (2 * ALIGN / sizeof(int)) + 8);
+            const int PARTITION_TMP_SIZE_IN_ELEMENTS = (int) (2 * SLACK_PER_SIDE_IN_ELEMENTS + 2 * ALIGN / sizeof(int) + V256_N);
 
             const long REALIGN_LEFT = 0x666;
             const long REALIGN_RIGHT = 0x66600000000;
@@ -158,7 +175,7 @@ namespace VxSort
 
             public VxUnstableSortInt32(int* startPtr, int* endPtr) : this()
             {
-                Debug.Assert(SMALL_SORT_THRESHOLD_ELEMENTS % 8 == 0);
+                Debug.Assert(SMALL_SORT_THRESHOLD_ELEMENTS % V256_N == 0);
 
                 _depth = 0;
                 _startPtr = startPtr;
@@ -167,11 +184,41 @@ namespace VxSort
                     _tempStart = pTemp;
                     _tempEnd   = pTemp + PARTITION_TMP_SIZE_IN_ELEMENTS;
                 }
+            }
 
+
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+            internal void Sort()
+            {
+                // It makes no sense to sort arrays smaller than the max supported
+                // bitonic sort with hybrid partitioning, so we special case those sized
+                // and just copy the entire source to the tmp memory, pad it with
+                // int.MaxValue and call BitonicSort
+                var cachedLength = (uint) (ulong) Length;
+                if (cachedLength <= BitonicSort<int>.MaxBitonicSortSize) {
+                    CopyAndSortWithBitonic(cachedLength);
+                    return;
+                }
+
+                var depthLimit = 2 * FloorLog2PlusOne(cachedLength);
+                HybridSort(_startPtr, _endPtr, REALIGN_BOTH, depthLimit);
+            }
+
+            void CopyAndSortWithBitonic(uint cachedLength)
+            {
+                var start = _startPtr;
+                var tmp = _tempStart;
+                var byteCount = cachedLength * sizeof(int);
+
+                var adjustedLength = cachedLength & ~0b111;
+                Store(tmp + adjustedLength, Vector256.Create(int.MaxValue));
+                Unsafe.CopyBlockUnaligned(tmp, start, byteCount);
+                BitonicSort<int>.Sort(tmp, (int) Math.Min(adjustedLength + 8, BitonicSort<int>.MaxBitonicSortSize));
+                Unsafe.CopyBlockUnaligned(start, tmp, byteCount);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-            internal void Sort(int* left, int* right, long hint, int depthLimit)
+            internal void HybridSort(int* left, int* right, long realignHint, int depthLimit)
             {
                 Debug.Assert(left <= right);
 
@@ -201,7 +248,7 @@ namespace VxSort
                 // This is kind of critical given that we only limited # of implementation of
                 // vectorized bitonic sort
                 if (length < SMALL_SORT_THRESHOLD_ELEMENTS) {
-                    var nextLength = (length & 7) > 0 ? (length + 8) & ~7: length;
+                    var nextLength = (length & 7) > 0 ? (length + V256_N) & ~7: length;
 
                     Debug.Assert(nextLength <= BitonicSort<int>.MaxBitonicSortSize);
                     var extraSpaceNeeded = nextLength - length;
@@ -215,7 +262,18 @@ namespace VxSort
                     _depth--;
                     return;
                 }
-
+                
+                // Detect a whole bunch of bad cases where partitioning
+                // will not do well:
+                // 1. Reverse sorted array
+                // 2. High degree of repeated values (dutch flag problem, one value)
+                if (depthLimit == 0)
+                {
+                    HeapSort(new Span<int>(left, (int) (right - left + 1)));
+                    _depth--;
+                    return;
+                }
+                depthLimit--;
 
                 // This is going to be a bit weird:
                 // Pre/Post alignment calculations happen here: we prepare hints to the
@@ -235,35 +293,35 @@ namespace VxSort
 
                 var preAlignedLeft = (int*)  ((ulong) left & ~ALIGN_MASK);
                 var cannotPreAlignLeft = (preAlignedLeft - _startPtr) >> 63;
-                var preAlignLeftOffset = (preAlignedLeft - left) + (8 & cannotPreAlignLeft);
-                if ((hint & REALIGN_LEFT) == REALIGN_LEFT) {
+                var preAlignLeftOffset = (preAlignedLeft - left) + (V256_N & cannotPreAlignLeft);
+                if ((realignHint & REALIGN_LEFT) != 0) {
                     // Alignment flow:
                     // * Calculate pre-alignment on the left
                     // * See it would cause us an out-of bounds read
                     // * Since we'd like to avoid that, we adjust for post-alignment
                     // * There are no branches since we do branch->arithmetic
-                    hint &= unchecked((long) 0xFFFFFFFF00000000UL);
-                    hint |= preAlignLeftOffset;
+                    realignHint &= unchecked((long) 0xFFFFFFFF00000000UL);
+                    realignHint |= preAlignLeftOffset;
                 }
 
                 var preAlignedRight = (int*) (((ulong) right - 1 & ~ALIGN_MASK) + ALIGN);
                 var cannotPreAlignRight = (_endPtr - preAlignedRight) >> 63;
-                var preAlignRightOffset = (preAlignedRight - right - (8 & cannotPreAlignRight));
-                if ((hint & REALIGN_RIGHT) == REALIGN_RIGHT) {
+                var preAlignRightOffset = (preAlignedRight - right - (V256_N & cannotPreAlignRight));
+                if ((realignHint & REALIGN_RIGHT) != 0) {
                     // right is pointing just PAST the last element we intend to partition (where we also store the pivot)
                     // So we calculate alignment based on right - 1, and YES: I am casting to ulong before doing the -1, this
                     // is intentional since the whole thing is either aligned to 32 bytes or not, so decrementing the POINTER value
                     // by 1 is sufficient for the alignment, an the JIT sucks at this anyway
-                    hint &= 0xFFFFFFFF;
-                    hint |= preAlignRightOffset << 32;
+                    realignHint &= 0xFFFFFFFF;
+                    realignHint |= preAlignRightOffset << 32;
                 }
 
-                Debug.Assert(((ulong) (left + (hint & 0xFFFFFFFF)) & ALIGN_MASK) == 0);
-                Debug.Assert(((ulong) (right + (hint >> 32)) & ALIGN_MASK) == 0);
+                Debug.Assert(((ulong) (left + (realignHint & 0xFFFFFFFF)) & ALIGN_MASK) == 0);
+                Debug.Assert(((ulong) (right + (realignHint >> 32)) & ALIGN_MASK) == 0);
 
                 // Compute median-of-three, of:
                 // the first, mid and one before last elements
-                mid = left + ((right - left) / 2);
+                mid = left + (right - left) / 2;
                 SwapIfGreater(left, mid);
                 SwapIfGreater(left, right - 1);
                 SwapIfGreater(mid, right - 1);
@@ -279,22 +337,11 @@ namespace VxSort
 #endif
 
                 var sep = length < PARTITION_TMP_SIZE_IN_ELEMENTS ?
-                    Partition1VectorInPlace(left, right, hint) :
-                    Partition8VectorsInPlace(left, right, hint);
+                    Partition1VectorInPlace(left, right, realignHint) :
+                    Partition8VectorsInPlace(left, right, realignHint);
 
-                // Detect a whole bunch of bad cases where partitioning
-                // will not do well:
-                // 1. Reverse sorted array
-                // 2. High degree of repeated values (dutch flag problem, one value)
-                if (depthLimit == 0)
-                {
-                    HeapSort(new Span<int>(left, (int) (right - left + 1)));
-                    _depth--;
-                    return;
-                }
-                depthLimit--;
-                Sort(left, sep - 2, hint | REALIGN_RIGHT, depthLimit);
-                Sort(sep, right, hint | REALIGN_LEFT, depthLimit);
+                HybridSort(left, sep - 2, realignHint | REALIGN_RIGHT, depthLimit);
+                HybridSort(sep, right, realignHint | REALIGN_LEFT, depthLimit);
                 _depth--;
             }
 
@@ -404,12 +451,12 @@ namespace VxSort
                 var leftAlignMask = leftAlign >> 31;
 
                 tmpRight -= rtPopCount & rightAlignMask;
-                rtPopCount = 8 - rtPopCount;
+                rtPopCount = V256_N - rtPopCount;
                 readRight += (rightAlign - N) & rightAlignMask;
 
                 Store(tmpRight, LT0);
                 tmpRight -= ltPopCount & leftAlignMask;
-                ltPopCount =  8 - ltPopCount;
+                ltPopCount =  V256_N - ltPopCount;
                 tmpLeft += ltPopCount & leftAlignMask;
                 tmpStartLeft += -leftAlign & leftAlignMask;
                 readLeft += (leftAlign + N) & leftAlignMask;
@@ -437,7 +484,7 @@ namespace VxSort
 
                 #endregion
 
-                // Make 4 vectors worth of space on each side by partitioning them straight into the temporary memory
+                // Make 8 vectors worth of space on each side by partitioning them straight into the temporary memory
                 LoadAndPartition8Vectors(readLeft, P, pBase, ref tmpLeft, ref tmpRight);
                 LoadAndPartition8Vectors(readRight - SLACK_PER_SIDE_IN_ELEMENTS, P, pBase, ref tmpLeft, ref tmpRight);
                 tmpRight += N;
@@ -502,7 +549,6 @@ namespace VxSort
                 boundary += leftTmpSize;
                 var rightTmpSize = (uint) (ulong) (tmpStartRight - tmpRight);
                 Unsafe.CopyBlockUnaligned(boundary, tmpRight, rightTmpSize*sizeof(int));
-
 
                 // Shove to pivot back to the boundary
                 var value = *boundary;
@@ -600,7 +646,7 @@ namespace VxSort
                 //       for the negation operation, which will also do its share to speed things up while lowering
                 //       the native code size, yay for future me!
                 writeRight = writeRight + pc;
-                writeLeft = writeLeft + pc + 8;
+                writeLeft = writeLeft + pc + V256_N;
             }
 
             /// <summary>
@@ -705,12 +751,12 @@ namespace VxSort
                 var leftAlignMask = leftAlign >> 31;
 
                 tmpRight -= rtPopCount & rightAlignMask;
-                rtPopCount = 8 - rtPopCount;
+                rtPopCount = V256_N - rtPopCount;
                 readRight += (rightAlign - N) & rightAlignMask;
 
                 Avx.Store(tmpRight, LT0);
                 tmpRight -= ltPopCount & leftAlignMask;
-                ltPopCount =  8 - ltPopCount;
+                ltPopCount =  V256_N - ltPopCount;
                 tmpLeft += ltPopCount & leftAlignMask;
                 tmpStartLeft += -leftAlign & leftAlignMask;
                 readLeft += (leftAlign + N) & leftAlignMask;
@@ -734,7 +780,7 @@ namespace VxSort
                 Debug.Assert(((ulong) readRight & ALIGN_MASK) == 0);
 
                 Debug.Assert((((byte *) readRight - (byte *) readLeft) % (long) ALIGN) == 0);
-                Debug.Assert((readRight -  readLeft) >= EIGTH_SLACK_PER_SIDE_IN_ELEMENTS * 2);
+                Debug.Assert((readRight -  readLeft) >= EIGHTH_SLACK_PER_SIDE_IN_ELEMENTS * 2);
 
                 // Read ahead from left+right
                 LT0 = LoadAlignedVector256(readLeft  + 0*N);
@@ -755,10 +801,10 @@ namespace VxSort
 
                 Store(tmpRight, LT0);
                 tmpRight -= ltPopCount;
-                ltPopCount = 8 - ltPopCount;
+                ltPopCount = V256_N - ltPopCount;
                 Store(tmpRight, RT0);
                 tmpRight -= rtPopCount;
-                rtPopCount = 8 - rtPopCount;
+                rtPopCount = V256_N - rtPopCount;
                 tmpRight += N;
 
                 Store(tmpLeft, LT0);

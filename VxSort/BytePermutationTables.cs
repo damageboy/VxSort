@@ -267,7 +267,7 @@ namespace VxSort
             8, 1, 2, 3, 4, 5, 6, 7,  // 0b11111110 (254)|Left-PC: 1
             0, 1, 2, 3, 4, 5, 6, 7,  // 0b11111111 (255)|Left-PC: 0
         };
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Vector256<int> GetBytePermutationAligned(byte * pBase, uint index)
         {
@@ -285,7 +285,7 @@ namespace VxSort
             Debug.Assert(((ulong) (pBase + index * 8)) % 8 == 0);
             return Avx2.ConvertToVector256Int32(pBase + index * 8);
         }
-        
+
         internal static readonly unsafe byte* BytePermTableAlignedPtr;
 
         const uint PAGE_SIZE = 4096U;
