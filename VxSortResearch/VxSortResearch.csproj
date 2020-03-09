@@ -13,13 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Unstable\SmallSort\BitonicSort.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>BitonicSort.Generated.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
@@ -29,5 +22,12 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>BitonicSort.Generated.tt</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Unstable\SmallSort\BitonicSort.Generated.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>BitonicSort.Generated.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 </Project>
