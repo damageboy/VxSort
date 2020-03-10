@@ -16,6 +16,12 @@ namespace TestBlog
         public SortTestCaseData(DataGenerator generator) : base(generator) { }
     }
 
+    public class GSortTestCaseData<T> : TestCaseData where T : unmanaged
+    {
+        public GSortTestCaseData(System.Func<(T[] data, T[] sortedData, string reproContext)> generator) : base(generator) { }
+    }
+
+
     [Parallelizable(ParallelScope.All)]
     public class UnstableParityTests
     {
