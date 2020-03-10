@@ -142,7 +142,7 @@ namespace VxSortResearch.Statistics
             return ToMarkDownString('|');
         }
 
-        private string ToMarkDownString(char delimiter)
+        string ToMarkDownString(char delimiter)
         {
             var builder = new StringBuilder();
 
@@ -206,7 +206,7 @@ namespace VxSortResearch.Statistics
             return builder.ToString();
         }
 
-        private string Format(List<int> columnLengths, char delimiter = '|')
+        string Format(List<int> columnLengths, char delimiter = '|')
         {
             // set right alinment if is a number
             var columnAlignment = Enumerable.Range(0, Columns.Count)
@@ -222,7 +222,7 @@ namespace VxSortResearch.Statistics
             return format;
         }
 
-        private string GetNumberAlignment(int i)
+        string GetNumberAlignment(int i)
         {
             return Options.NumberAlignment == Alignment.Right
                     && ColumnTypes != null
@@ -231,7 +231,7 @@ namespace VxSortResearch.Statistics
                 : "-";
         }
 
-        private List<int> ColumnLengths()
+        List<int> ColumnLengths()
         {
             var columnLengths = Columns
                 .Select((t, i) => Rows.Select(x => x[i])
@@ -263,17 +263,17 @@ namespace VxSortResearch.Statistics
             }
         }
 
-        private static IEnumerable<string> GetColumns<T>()
+        static IEnumerable<string> GetColumns<T>()
         {
             return typeof(T).GetProperties().Select(x => x.Name).ToArray();
         }
 
-        private static object GetColumnValue<T>(object target, string column)
+        static object GetColumnValue<T>(object target, string column)
         {
             return typeof(T).GetProperty(column).GetValue(target, null);
         }
 
-        private static IEnumerable<Type> GetColumnsType<T>()
+        static IEnumerable<Type> GetColumnsType<T>()
         {
             return typeof(T).GetProperties().Select(x => x.PropertyType).ToArray();
         }

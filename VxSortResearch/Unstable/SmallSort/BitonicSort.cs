@@ -8,7 +8,8 @@ using static System.Runtime.Intrinsics.X86.Avx2;
 namespace VxSortResearch.Unstable.SmallSort
 {
     using V = Vector256<int>;
-    static partial class BitonicSort<T> where T : unmanaged, IComparable<T>
+
+    internal static partial class BitonicSort<T> where T : unmanaged, IComparable<T>
     {
 
         // Legend:
@@ -43,7 +44,7 @@ namespace VxSortResearch.Unstable.SmallSort
         // BitonicSort3V will be directly embedded in BitonicSort{7,11}V
         // etc.
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        static void BitonicSort01VGeneric(ref Vector256<T> d)
+        public static void BitonicSort01VGeneric(ref Vector256<T> d)
         {
             // ReSharper disable JoinDeclarationAndInitializer
             Vector256<T> min, max, s;
@@ -63,7 +64,7 @@ namespace VxSortResearch.Unstable.SmallSort
             max = MaxV(s, d);
             d   = BlendB1(min, max);
 
-            s = Reverse(s);
+            s = Reverse(d);
             min = MinV(s, d);
             max = MaxV(s, d);
             d   = BlendB4(min, max);
@@ -79,7 +80,7 @@ namespace VxSortResearch.Unstable.SmallSort
             d   = BlendB1(min, max);
         }
 
-        private static Vector256<T> Reverse(in Vector256<T> v)
+        static Vector256<T> Reverse(in Vector256<T> v)
         {
             if (typeof(T) == typeof(int)) {
                 return Permute4x64(
@@ -93,7 +94,7 @@ namespace VxSortResearch.Unstable.SmallSort
                 throw new NotImplementedException("This type is not supported yet");
             }        }
 
-        private static Vector256<T> BlendB1(in Vector256<T> v1, in Vector256<T> v2)
+        static Vector256<T> BlendB1(in Vector256<T> v1, in Vector256<T> v2)
         {
             if (typeof(T) == typeof(int)) {
                 return Blend(v1.AsInt32(), v2.AsInt32(), B_1).As<int, T>();
@@ -105,9 +106,8 @@ namespace VxSortResearch.Unstable.SmallSort
                 throw new NotImplementedException("This type is not supported yet");
             }            
         }
-        
 
-        private static Vector256<T> BlendB2(in Vector256<T> v1, in Vector256<T> v2)
+        static Vector256<T> BlendB2(in Vector256<T> v1, in Vector256<T> v2)
         {
             if (typeof(T) == typeof(int)) {
                 return Blend(v1.AsInt32(), v2.AsInt32(), B_2).As<int, T>();
@@ -119,9 +119,8 @@ namespace VxSortResearch.Unstable.SmallSort
                 throw new NotImplementedException("This type is not supported yet");
             }            
         }
-        
-        
-        private static Vector256<T> BlendB4(in Vector256<T> v1, in Vector256<T> v2)
+
+        static Vector256<T> BlendB4(in Vector256<T> v1, in Vector256<T> v2)
         {
             if (typeof(T) == typeof(int)) {
                 return Blend(v1.AsInt32(), v2.AsInt32(), B_4).As<int, T>();
@@ -134,7 +133,7 @@ namespace VxSortResearch.Unstable.SmallSort
             }            
         }
 
-        private static Vector256<T> MinV(in Vector256<T> v1, in Vector256<T> v2)
+        static Vector256<T> MinV(in Vector256<T> v1, in Vector256<T> v2)
         {
             if (typeof(T) == typeof(int)) {
                 return Min(v1.AsInt32(), v2.AsInt32()).As<int, T>();
@@ -146,21 +145,29 @@ namespace VxSortResearch.Unstable.SmallSort
                 throw new NotImplementedException("This type is not supported yet");
             }
         }
-        
-        private static Vector256<T> MaxV(in Vector256<T> v1, in Vector256<T> v2)
+
+        static Vector256<T> MaxV(in Vector256<T> v1, in Vector256<T> v2)
         {
             if (typeof(T) == typeof(int)) {
                 return Max(v1.AsInt32(), v2.AsInt32()).As<int, T>();
             }
+            else if (typeof(T) == typeof(long)) {
+                var mask = CompareGreaterThan(v1.AsInt64(), v2.AsInt64());
+                BlendVariable(v1.AsDouble(), v2.AsDouble(), mask.AsDouble());
+                return Max(v1.AsInt64(), v2.AsInt64()).As<long, T>();
+            }
             else if (typeof(T) == typeof(float)) {
                 return Max(v1.AsSingle(), v2.AsSingle()).As<float, T>();
             }
+            else if (typeof(T) == typeof(double)) {
+                return Max(v1.AsDouble(), v2.AsDouble()).As<double, T>();
+            }
             else {
                 throw new NotImplementedException("This type is not supported yet");
             }
-        }        
+        }
 
-        private static Vector256<T> ShuffleX1(in Vector256<T> v)
+        static Vector256<T> ShuffleX1(in Vector256<T> v)
         {
             if (typeof(T) == typeof(int)) {
                 return Shuffle(v.AsInt32(), X_1).As<int, T>();
@@ -173,7 +180,7 @@ namespace VxSortResearch.Unstable.SmallSort
             }
         }
 
-        private static Vector256<T> ShuffleX2(in Vector256<T> v)
+        static Vector256<T> ShuffleX2(in Vector256<T> v)
         {
             if (typeof(T) == typeof(int)) {
                 return Shuffle(v.AsInt32(), X_2).As<int, T>();
@@ -186,7 +193,7 @@ namespace VxSortResearch.Unstable.SmallSort
             }
         }
 
-        private static Vector256<T> ShuffleXR(in Vector256<T> v)
+        static Vector256<T> ShuffleXR(in Vector256<T> v)
         {
             if (typeof(T) == typeof(int)) {
                 return Shuffle(v.AsInt32(), X_R).As<int, T>();
@@ -198,7 +205,6 @@ namespace VxSortResearch.Unstable.SmallSort
                 throw new NotImplementedException("This type is not supported yet");
             }
         }
-
 
         // Basic 8-element bitonic sort
         // This will get composed and inlined throughout
@@ -208,7 +214,7 @@ namespace VxSortResearch.Unstable.SmallSort
         // BitonicSort3V will be directly embedded in BitonicSort{7,11}V
         // etc.
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        static void BitonicSort01V(ref V d)
+        public static void BitonicSort01V(ref V d)
         {
             // ReSharper disable JoinDeclarationAndInitializer
             V min, max, s;
@@ -221,7 +227,7 @@ namespace VxSortResearch.Unstable.SmallSort
             s   = Shuffle(d, X_R);
             min = Min(s, d);
             max = Max(s, d);
-            d   = Blend(min, max,B_2);
+            d   = Blend(min, max, B_2);
 
             s   = Shuffle(d, X_1);
             min = Min(s, d);
@@ -237,7 +243,7 @@ namespace VxSortResearch.Unstable.SmallSort
             s   = Shuffle(d, X_2);
             min = Min(s, d);
             max = Max(s, d);
-            d   = Blend(min, max,B_2);
+            d   = Blend(min, max, B_2);
 
             s   = Shuffle(d, X_1);
             min = Min(s, d);

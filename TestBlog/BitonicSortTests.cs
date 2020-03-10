@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Intrinsics.X86;
 using NUnit.Framework;
 using VxSortResearch.Unstable.SmallSort;
 using static Test.DataGeneration;
@@ -57,5 +58,41 @@ namespace TestBlog
             Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
         }
 
+
+        static IEnumerable<TestCaseData> XXX =>
+            from size in new int[] { 8 }
+            from seed in new[] {666, 333, 999, 314159}
+            select new SortTestCaseData(() => GenerateData(size, seed, modulo: 100)).SetArgDisplayNames($"{size:000}/{seed}");
+
+        [TestCaseSource(nameof(XXX))]
+        public unsafe void GenericBitonicSortTest(DataGenerator generator)
+        {
+            var (randomData, sortedData, reproContext) = generator();
+
+            fixed (int* p = &randomData[0]) {
+                var v = Avx2.LoadDquVector256(p);
+                BitonicSort<int>.BitonicSort01VGeneric(ref v);
+                Avx.Store(p, v);
+            }
+
+            Assert.That(randomData, Is.Ordered,             reproContext);
+            Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
+        }
+
+
+        [TestCaseSource(nameof(XXX))]
+        public unsafe void BitonicSort01VTest(DataGenerator generator)
+        {
+            var (randomData, sortedData, reproContext) = generator();
+
+            fixed (int* p = &randomData[0]) {
+                var v = Avx2.LoadDquVector256(p);
+                BitonicSort<int>.BitonicSort01V(ref v);
+                Avx.Store(p, v);
+            }
+
+            Assert.That(randomData, Is.Ordered,             reproContext);
+            Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
+        }
     }
 }
