@@ -9,6 +9,8 @@ namespace Test {
     /// </summary>
     public static class DataGeneration
     {
+
+
         internal static (int[] randomData, int[] sortedData, string reproContext) GenerateData(
             int size, int seed, int forcedValue = -1, double forcedValueRate = double.NaN, int modulo = int.MaxValue, bool dontSort = false)
         {
@@ -76,8 +78,12 @@ namespace Test {
                     var value = r.Next();
                     return Unsafe.As<int, T>(ref value);
                 }
+                if (typeof(T) == typeof(uint)) {
+                    var value = (uint) r.Next();
+                    return Unsafe.As<uint, T>(ref value);
+                }
                 else if (typeof(T) == typeof(long)) {
-                    var value = (long) r.Next() << 32 | r.Next();
+                    var value = (long) r.Next() << 32 | (uint) r.Next();
                     return Unsafe.As<long, T>(ref value);
                 }
                 else if (typeof(T) == typeof(float)) {

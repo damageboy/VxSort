@@ -82,24 +82,18 @@ namespace VxSortResearch.Unstable.SmallSort
 
         static Vector256<T> Reverse(in Vector256<T> v)
         {
-            if (typeof(T) == typeof(int)) {
-                return Permute4x64(
-                    Shuffle(v.AsInt32(), X_R).AsInt64(), P_X).As<long, T>();
-            }
-            else if (typeof(T) == typeof(float)) {
+            if (typeof(T) == typeof(int) || typeof(T) == typeof(float) || typeof(T) == typeof(uint)) {
                 return Permute4x64(
                     Shuffle(v.AsInt32(), X_R).AsInt64(), P_X).As<long, T>();
             }
             else {
                 throw new NotImplementedException("This type is not supported yet");
-            }        }
+            }
+        }
 
         static Vector256<T> BlendB1(in Vector256<T> v1, in Vector256<T> v2)
         {
-            if (typeof(T) == typeof(int)) {
-                return Blend(v1.AsInt32(), v2.AsInt32(), B_1).As<int, T>();
-            }
-            else if (typeof(T) == typeof(float)) {
+            if (typeof(T) == typeof(int) || typeof(T) == typeof(float) || typeof(T) == typeof(uint)) {
                 return Blend(v1.AsInt32(), v2.AsInt32(), B_1).As<int, T>();
             }
             else {
@@ -109,10 +103,7 @@ namespace VxSortResearch.Unstable.SmallSort
 
         static Vector256<T> BlendB2(in Vector256<T> v1, in Vector256<T> v2)
         {
-            if (typeof(T) == typeof(int)) {
-                return Blend(v1.AsInt32(), v2.AsInt32(), B_2).As<int, T>();
-            }
-            else if (typeof(T) == typeof(float)) {
+            if (typeof(T) == typeof(int) || typeof(T) == typeof(float) || typeof(T) == typeof(uint)) {
                 return Blend(v1.AsInt32(), v2.AsInt32(), B_2).As<int, T>();
             }
             else {
@@ -122,10 +113,7 @@ namespace VxSortResearch.Unstable.SmallSort
 
         static Vector256<T> BlendB4(in Vector256<T> v1, in Vector256<T> v2)
         {
-            if (typeof(T) == typeof(int)) {
-                return Blend(v1.AsInt32(), v2.AsInt32(), B_4).As<int, T>();
-            }
-            else if (typeof(T) == typeof(float)) {
+            if (typeof(T) == typeof(int) || typeof(T) == typeof(float) || typeof(T) == typeof(uint)) {
                 return Blend(v1.AsInt32(), v2.AsInt32(), B_4).As<int, T>();
             }
             else {
@@ -137,6 +125,9 @@ namespace VxSortResearch.Unstable.SmallSort
         {
             if (typeof(T) == typeof(int)) {
                 return Min(v1.AsInt32(), v2.AsInt32()).As<int, T>();
+            }
+            if (typeof(T) == typeof(uint)) {
+                return Min(v1.AsUInt32(), v2.AsUInt32()).As<uint, T>();
             }
             else if (typeof(T) == typeof(float)) {
                 return Min(v1.AsSingle(), v2.AsSingle()).As<float, T>();
@@ -150,6 +141,9 @@ namespace VxSortResearch.Unstable.SmallSort
         {
             if (typeof(T) == typeof(int)) {
                 return Max(v1.AsInt32(), v2.AsInt32()).As<int, T>();
+            }
+            if (typeof(T) == typeof(uint)) {
+                return Max(v1.AsUInt32(), v2.AsUInt32()).As<uint, T>();
             }
             else if (typeof(T) == typeof(long)) {
                 var mask = CompareGreaterThan(v1.AsInt64(), v2.AsInt64());
@@ -168,10 +162,7 @@ namespace VxSortResearch.Unstable.SmallSort
 
         static Vector256<T> ShuffleX1(in Vector256<T> v)
         {
-            if (typeof(T) == typeof(int)) {
-                return Shuffle(v.AsInt32(), X_1).As<int, T>();
-            }
-            else if (typeof(T) == typeof(float)) {
+            if (typeof(T) == typeof(int) || typeof(T) == typeof(float) || typeof(T) == typeof(uint)) {
                 return Shuffle(v.AsInt32(), X_1).As<int, T>();
             }
             else {
@@ -181,10 +172,7 @@ namespace VxSortResearch.Unstable.SmallSort
 
         static Vector256<T> ShuffleX2(in Vector256<T> v)
         {
-            if (typeof(T) == typeof(int)) {
-                return Shuffle(v.AsInt32(), X_2).As<int, T>();
-            }
-            else if (typeof(T) == typeof(float)) {
+            if (typeof(T) == typeof(int) || typeof(T) == typeof(float) || typeof(T) == typeof(uint)) {
                 return Shuffle(v.AsInt32(), X_2).As<int, T>();
             }
             else {
@@ -194,10 +182,7 @@ namespace VxSortResearch.Unstable.SmallSort
 
         static Vector256<T> ShuffleXR(in Vector256<T> v)
         {
-            if (typeof(T) == typeof(int)) {
-                return Shuffle(v.AsInt32(), X_R).As<int, T>();
-            }
-            else if (typeof(T) == typeof(float)) {
+            if (typeof(T) == typeof(int) || typeof(T) == typeof(float) || typeof(T) == typeof(uint)) {
                 return Shuffle(v.AsInt32(), X_R).As<int, T>();
             }
             else {

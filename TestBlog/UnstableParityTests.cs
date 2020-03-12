@@ -16,9 +16,20 @@ namespace TestBlog
         public SortTestCaseData(DataGenerator generator) : base(generator) { }
     }
 
+    public class SortTestGenerator<T> where T : unmanaged
+    {
+        public SortTestGenerator(System.Func<(T[] data, T[] sortedData, string reproContext)> generator)
+        {
+            Generator = generator;
+        }
+
+        public Func<(T[] data, T[] sortedData, string reproContext)> Generator { get; set; }
+    }
+
     public class GSortTestCaseData<T> : TestCaseData where T : unmanaged
     {
-        public GSortTestCaseData(System.Func<(T[] data, T[] sortedData, string reproContext)> generator) : base(generator) { }
+
+        public GSortTestCaseData(SortTestGenerator<T> generator) : base(generator) { }
     }
 
 

@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.Intrinsics;
-using System.Runtime.Intrinsics.X86;
 using NUnit.Framework;
 using VxSortResearch.Unstable.SmallSort;
 using static Test.DataGeneration;
@@ -53,35 +51,6 @@ namespace TestBlog
 
             fixed (int* p = &randomData[0]) {
                 BitonicSort<int>.Sort(p, randomData.Length);
-            }
-
-            Assert.That(randomData, Is.Ordered,             reproContext);
-            Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
-        }
-
-
-        static IEnumerable<TestCaseData> XXXInt =>
-            from size in new int[] { 8 }
-            from seed in new[] {666, 333, 999, 314159}
-            select new GSortTestCaseData<int>(() => GGenerateData<int>(size, seed)).SetArgDisplayNames($"{size:000}/{seed}");
-
-
-        static IEnumerable<TestCaseData> XXXFloat =>
-            from size in new int[] { 8 }
-            from seed in new[] {666, 333, 999, 314159}
-            select new GSortTestCaseData<float>(() => GGenerateData<float>(size, seed)).SetArgDisplayNames($"{size:000}/{seed}");
-
-
-        [TestCaseSource(nameof(XXXFloat))]
-        public unsafe void GenericBitonicSortTest(Func<(T[] data, T[] sortedData, string reproContext)> generator)
-        {
-            var (randomData, sortedData, reproContext) = generator();
-
-            fixed (T* p = &randomData[0]) {
-                var wat = (void*) p;
-                var v = Avx2.LoadDquVector256((byte *)wat).As<byte, T>();
-                BitonicSort<T>.BitonicSort01VGeneric(ref v);
-                Avx.Store((byte *)wat, v.AsByte());
             }
 
             Assert.That(randomData, Is.Ordered,             reproContext);
