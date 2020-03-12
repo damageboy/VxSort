@@ -6,9 +6,9 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Extensions;
-using BenchmarkDotNet.Horology;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Reports;
+using Perfolizer.Horology;
 using VxSortResearch.Unstable.AVX2.Happy;
 using VxSortResearch.Unstable.AVX2.Sad;
 using VxSortResearch.Unstable.Scalar;
@@ -20,8 +20,8 @@ namespace Bench
         public LongConfig()
         {
             SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.GB, TimeUnit.Microsecond);
-            Add(Job.LongRun);
-            Add(new TimePerNColumn());
+            AddJob(Job.LongRun);
+            AddColumn(new TimePerNColumn());
         }
     }
 
@@ -30,8 +30,8 @@ namespace Bench
         public MediumConfig()
         {
             SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.GB, TimeUnit.Microsecond);
-            Add(Job.MediumRun);
-            Add(new TimePerNColumn());
+            AddJob(Job.MediumRun);
+            AddColumn(new TimePerNColumn());
         }
     }
 
@@ -40,8 +40,8 @@ namespace Bench
         public ShortConfig()
         {
             SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.GB, TimeUnit.Microsecond);
-            Add(Job.ShortRun);
-            Add(new TimePerNColumn());
+            AddJob(Job.ShortRun);
+            AddColumn(new TimePerNColumn());
         }
     }
 

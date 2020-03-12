@@ -8,10 +8,10 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
-using BenchmarkDotNet.Horology;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Toolchains.InProcess.Emit;
+using Perfolizer.Horology;
 using VxSortResearch.Utils;
 
 namespace Bench
@@ -24,13 +24,11 @@ namespace Bench
             AddJob(Job.LongRun); //);.With(InProcessEmitToolchain.Instance));
             AddColumn(SpeedupRatioColumn.SpeedupOfMean);
             AddColumn(WorthinessRatioColumn.WorthinessOfMean);
-
             AddDiagnoser(
                 new DisassemblyDiagnoser(
                     new DisassemblyDiagnoserConfig(
                         maxDepth: 2, // you can change it to a bigger value if you want to get more framework methods disassembled
                         exportGithubMarkdown: true)));
-
         }
     }
 

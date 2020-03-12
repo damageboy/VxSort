@@ -98,12 +98,20 @@ namespace Bench.Utils
             return dictionary;
         }
 
-        private static T GenerateValue<T>(Random random)
+        static T GenerateValue<T>(Random random)
         {
             if (typeof(T) == typeof(char))
                 return (T)(object)(char)random.Next(char.MinValue, char.MaxValue);
             if (typeof(T) == typeof(int))
                 return (T)(object)random.Next();
+            if (typeof(T) == typeof(uint))
+                return (T)(object)(uint)random.Next();
+            if (typeof(T) == typeof(long))
+                return (T)(object)((long)random.Next() << 32 | (uint) random.Next());;
+            if (typeof(T) == typeof(ulong))
+                return (T)(object)((ulong) (uint) random.Next() << 32 | (uint) random.Next());
+            if (typeof(T) == typeof(float))
+                return (T)(object)(float)random.NextDouble();
             if (typeof(T) == typeof(double))
                 return (T)(object)random.NextDouble();
             if (typeof(T) == typeof(bool))

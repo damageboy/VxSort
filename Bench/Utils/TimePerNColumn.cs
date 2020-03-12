@@ -3,9 +3,9 @@ using System.Linq;
 using System.Text;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Environments;
-using BenchmarkDotNet.Horology;
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
+using Perfolizer.Horology;
 
 namespace Bench.Utils
 {

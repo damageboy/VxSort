@@ -6,9 +6,9 @@ using System.Runtime.Intrinsics;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
-using BenchmarkDotNet.Horology;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Reports;
+using Perfolizer.Horology;
 using VxSortResearch;
 using VxSortResearch.PermutationTables;
 using static System.Runtime.Intrinsics.X86.Avx;
@@ -24,7 +24,7 @@ namespace Bench
         public MicroBenchmarksConfig()
         {
             SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.GB, TimeUnit.Nanosecond);
-            Add(Job.LongRun); //);.With(InProcessEmitToolchain.Instance));
+            AddJob(Job.LongRun); //);.With(InProcessEmitToolchain.Instance));
         }
     }
 

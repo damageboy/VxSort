@@ -1,15 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
 using Bench.Utils;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Extensions;
-using BenchmarkDotNet.Horology;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Reports;
+using Perfolizer.Horology;
 using VxSortResearch.Stable.SmallSort;
 using VxSortResearch.Unstable.SmallSort;
 
@@ -19,9 +22,14 @@ namespace Bench
     {
         public SmallSortConfig()
         {
-            SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.GB, TimeUnit.Nanosecond);
-            Add(Job.LongRun);
-            Add(new TimePerNColumn());
+            SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.B, TimeUnit.Nanosecond);
+            AddJob(Job.LongRun);
+            AddColumn(new TimePerNColumn());
+            AddDiagnoser(
+                new DisassemblyDiagnoser(
+                    new DisassemblyDiagnoserConfig(
+                        maxDepth: 2, // you can change it to a bigger value if you want to get more framework methods disassembled
+                        exportGithubMarkdown: true)));
         }
     }
 
@@ -68,7 +76,8 @@ namespace Bench
             ValuesGenerator.FillArrays(ref _arrays, InvocationsPerIteration, _originalValues);
     }
 
-    [GenericTypeArguments(typeof(int))] // value type
+
+    [GenericTypeArguments(typeof(int))]   // value type
     [InvocationCount(InvocationsPerIterationValue)]
     [Config(typeof(SmallSortConfig))]
     public class SmallSortBench<T> : SmallSortBenchBase<T> where T : unmanaged, IComparable<T>
@@ -77,14 +86,40 @@ namespace Bench
         protected override int InvocationsPerIteration => InvocationsPerIterationValue;
         protected override int ArraySize => N;
 
-        [Params(8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128)]
+        //[Params(8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128)]
+        [ParamsSource(nameof(BitonicSizes))]
         public int N;
 
-        [Benchmark(Baseline = true)]
+        public IEnumerable<int> BitonicSizes => Enumerable.Range(1, 16).Select(x => x * Vector256<T>.Count);
+
+        //[Benchmark(Baseline = true)]
         public unsafe void PCSort() => PositionCountingSort.Sort<T>((int *) _arrayPtrs[_iterationIndex++], N, (int *) _tmp);
 
         [Benchmark]
         public unsafe void BitonicSort() => BitonicSort<T>.Sort((int *) _arrayPtrs[_iterationIndex++], N);
+    }
 
+    [GenericTypeArguments(typeof(int))] // value type
+    [GenericTypeArguments(typeof(uint))] // value type
+    [GenericTypeArguments(typeof(float))] // value type
+    [InvocationCount(InvocationsPerIterationValue)]
+    [Config(typeof(SmallSortConfig))]
+    public class GenericSmallSortBench<T> : SmallSortBenchBase<T> where T : unmanaged, IComparable<T>
+    {
+        const int InvocationsPerIterationValue = 4096;
+        protected override int InvocationsPerIteration => InvocationsPerIterationValue;
+        protected override int ArraySize => N;
+
+        //[Params(8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128)]
+        [ParamsSource(nameof(BitonicSizes))]
+        public int N;
+
+        public IEnumerable<int> BitonicSizes => Enumerable.Range(1, 16).Select(x => x * Vector256<T>.Count);
+
+        //[Benchmark(Baseline = true)]
+        public unsafe void PCSort() => PositionCountingSort.Sort<T>((int *) _arrayPtrs[_iterationIndex++], N, (int *) _tmp);
+
+        [Benchmark]
+        public unsafe void GenericBitonicSort() => GenericBitonicSort<T>.Sort(_arrayPtrs[_iterationIndex++], N);
     }
 }

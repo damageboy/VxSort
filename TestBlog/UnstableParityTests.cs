@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using NUnit.Framework;
+using Test;
 using VxSortResearch.Unstable.AVX2.Happy;
 using VxSortResearch.Unstable.AVX2.Sad;
 using VxSortResearch.Unstable.Scalar;
@@ -14,6 +16,21 @@ namespace TestBlog
     public class SortTestCaseData : TestCaseData
     {
         public SortTestCaseData(DataGenerator generator) : base(generator) { }
+    }
+
+    public class SortTestGenerator<T> where T : unmanaged
+    {
+        public SortTestGenerator(System.Func<(T[] data, T[] sortedData, string reproContext)> generator)
+        {
+            Generator = generator;
+        }
+
+        public Func<(T[] data, T[] sortedData, string reproContext)> Generator { get; set; }
+    }
+
+    public class GSortTestCaseData<T> : TestCaseData where T : unmanaged
+    {
+        public GSortTestCaseData(SortTestGenerator<T> generator) : base(generator) { }
     }
 
     [Parallelizable(ParallelScope.All)]
