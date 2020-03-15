@@ -58,8 +58,11 @@ namespace Bench.Utils
 
         public string GetValue(Summary summary, BenchmarkCase benchmarkCase, SummaryStyle style)
         {
-            var valueOfN = (int) benchmarkCase.Parameters.Items.Single(p => p.Name == "N").Value;
-            var timePerN = summary[benchmarkCase].ResultStatistics.Mean / valueOfN;
+            var valueOfN = benchmarkCase?.Parameters?.Items.SingleOrDefault(p => p.Name == "N")?.Value;
+            var mean = summary[benchmarkCase]?.ResultStatistics.Mean;
+            if (valueOfN == null || mean == null)
+                return "N/A";
+            var timePerN = mean.Value / (int) valueOfN;
             return timePerN.ToTimeStr(TimeUnit.GetBestTimeUnit(timePerN));
         }
 

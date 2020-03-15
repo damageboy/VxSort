@@ -27,6 +27,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>GenericBitonicSort.Generated.tt</DependentUpon>
     </Compile>
+    <Compile Update="Unstable\SmallSort\T4GeneratedBitonicSort.Generated.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>T4GeneratedBitonicSort.Generated.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -37,6 +42,10 @@
     <None Update="Unstable\SmallSort\GenericBitonicSort.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>GenericBitonicSort.Generated.cs</LastGenOutput>
+    </None>
+    <None Update="Unstable\SmallSort\T4GeneratedBitonicSort.Generated.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>T4GeneratedBitonicSort.Generated.cs</LastGenOutput>
     </None>
   </ItemGroup>
 </Project>

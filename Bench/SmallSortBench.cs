@@ -9,9 +9,11 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
+using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Extensions;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Reports;
+using BenchmarkDotNet.Toolchains.CoreRun;
 using Perfolizer.Horology;
 using VxSortResearch.Stable.SmallSort;
 using VxSortResearch.Unstable.SmallSort;
@@ -23,8 +25,8 @@ namespace Bench
         public SmallSortConfig()
         {
             SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.B, TimeUnit.Nanosecond);
-            AddJob(Job.LongRun);
-            AddColumn(new TimePerNColumn());
+            AddJob(Job.LongRun.WithToolchain(CoreRunToolchain));
+            //AddColumn(new TimePerNColumn());
             AddDiagnoser(
                 new DisassemblyDiagnoser(
                     new DisassemblyDiagnoserConfig(
