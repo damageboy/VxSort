@@ -25,8 +25,7 @@ namespace Bench
         public SmallSortConfig()
         {
             SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.B, TimeUnit.Nanosecond);
-            AddJob(Job.LongRun.WithToolchain(CoreRunToolchain));
-            //AddColumn(new TimePerNColumn());
+            AddColumn(new TimePerNColumn());
             AddDiagnoser(
                 new DisassemblyDiagnoser(
                     new DisassemblyDiagnoserConfig(
@@ -123,5 +122,10 @@ namespace Bench
 
         [Benchmark]
         public unsafe void GenericBitonicSort() => GenericBitonicSort<T>.Sort(_arrayPtrs[_iterationIndex++], N);
+
+        [Benchmark]
+        public unsafe void T4GeneratedBitonicSort() => T4GeneratedBitonicSort<T>.Sort(_arrayPtrs[_iterationIndex++], N);
+
+
     }
 }

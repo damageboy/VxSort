@@ -80,7 +80,7 @@ namespace VxSortResearch.Unstable.SmallSort
 
     string GenerateBlendB1(string v1, string v2, string type) => BitonicSizeMap[type] switch {
         4 => $"Blend({v1}, {v2}, B_1)",
-        8 => $"Blend({v1}.AsDouble(), {v2}.AsDouble(), 0b01_01).As{BitonicTypeMap[type]}()",
+        8 => $"Blend({v1}.AsDouble(), {v2}.AsDouble(), 0b10_10).As{BitonicTypeMap[type]}()",
     };
 
     string GenerateBlendB2(string v1, string v2, string type) => BitonicSizeMap[type] switch {
@@ -282,7 +282,7 @@ namespace VxSortResearch.Unstable.SmallSort
 <#
     foreach (var type in BitonicTypes) { #>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static void Sort(<#= type #>* ptr, int length)
+        public static void Sort<#= BitonicTypeMap[type] #>(<#= type #>* ptr, int length)
         {
             var N = Vector256<<#= type #>>.Count;
             Debug.Assert(length % N == 0);
@@ -300,5 +300,19 @@ namespace VxSortResearch.Unstable.SmallSort
             }
         }
 <#  } #>
+
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static void Sort(T* ptr, int length)
+        {
+<#  foreach (var type in BitonicTypes) { #>
+            if (typeof(T) == typeof(<#= type #>)) {
+                Sort<#= BitonicTypeMap[type] #>((<#= type #> *) ptr, length);
+            }
+            else
+<#  } #>
+                throw new NotSupportedException();
+        }
     }
 }

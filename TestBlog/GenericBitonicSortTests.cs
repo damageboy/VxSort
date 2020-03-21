@@ -17,7 +17,7 @@ namespace TestBlog
         static readonly int[] _bitonic32bSizes = {8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128};
         static readonly int[] _bitonic64bSizes = {4,  8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48,  52,  56,  60,  64};
         static readonly Type[] _bitonicTypes = { typeof(int), typeof(uint), typeof(float) };
-        
+
         static IEnumerable<TestCaseData> IntTests =>
             from size in _bitonic32bSizes
             from seed in new[] {666, 333, 999, 314159}
@@ -48,8 +48,6 @@ namespace TestBlog
             from seed in new[] {666, 333, 999, 314159}
             select new GSortTestCaseData<ulong>(new SortTestGenerator<ulong>(() => DataGeneration.GenerateData<ulong>(size, seed))).SetArgDisplayNames($"ulong/{size:000}/{seed}");
 
-
-
         [TestCaseSourceGeneric(nameof(IntTests),    TypeArguments = new[] { typeof(int)}   )]
         [TestCaseSourceGeneric(nameof(UIntTests),   TypeArguments = new[] { typeof(uint)}  )]
         [TestCaseSourceGeneric(nameof(FloatTests),  TypeArguments = new[] { typeof(float)} )]
@@ -62,6 +60,24 @@ namespace TestBlog
 
             fixed (T* p = &randomData[0]) {
                 GenericBitonicSort<T>.Sort(p, randomData.Length);
+            }
+
+            Assert.That(randomData, Is.Ordered,             reproContext);
+            Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
+        }
+
+        [TestCaseSourceGeneric(nameof(IntTests),    TypeArguments = new[] { typeof(int)}   )]
+        [TestCaseSourceGeneric(nameof(UIntTests),   TypeArguments = new[] { typeof(uint)}  )]
+        [TestCaseSourceGeneric(nameof(FloatTests),  TypeArguments = new[] { typeof(float)} )]
+        [TestCaseSourceGeneric(nameof(DoubleTests), TypeArguments = new[] { typeof(double)})]
+        [TestCaseSourceGeneric(nameof(LongTests),   TypeArguments = new[] { typeof(long)}  )]
+        [TestCaseSourceGeneric(nameof(ULongTests),  TypeArguments = new[] { typeof(ulong)} )]
+        public unsafe void T4GeneratedBitonicSortTest<T>(SortTestGenerator<T> dg) where T : unmanaged
+        {
+            var (randomData, sortedData, reproContext) = dg.Generator();
+
+            fixed (T* p = &randomData[0]) {
+                T4GeneratedBitonicSort<T>.Sort(p, randomData.Length);
             }
 
             Assert.That(randomData, Is.Ordered,             reproContext);

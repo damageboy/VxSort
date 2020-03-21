@@ -5,20 +5,17 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
   &lt;Assembly Path="/home/dmg/.nuget/packages/newtonsoft.json/12.0.3-beta2/lib/netstandard2.0/Newtonsoft.Json.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=dae99d29_002D21cf_002D49fd_002Da913_002D4048bcf2e536/@EntryIndexedValue">&lt;SessionState ContinuousTestingIsOn="False" ContinuousTestingMode="0" FrameworkVersion="{x:Null}" IsLocked="False" Name="GenericBitonicSortTest" PlatformMonoPreference="{x:Null}" PlatformType="{x:Null}" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=dd085ff1_002D4aad_002D4c96_002Da9a2_002Dc1bdffd206bb/@EntryIndexedValue">&lt;SessionState ContinuousTestingIsOn="False" ContinuousTestingMode="0" FrameworkVersion="{x:Null}" IsLocked="False" Name="GenericBitonicSortTest" PlatformMonoPreference="{x:Null}" PlatformType="{x:Null}" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"&gt;
   &lt;Or&gt;
-    &lt;Or&gt;
-      &lt;TestAncestor&gt;
-        &lt;TestId&gt;::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests.GenericBitonicSortTest&lt;/TestId&gt;
-      &lt;/TestAncestor&gt;
-      &lt;TestAncestor&gt;
-        &lt;TestId&gt;::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests.AVX2MinMaxUInt64BitWorks&lt;/TestId&gt;
-      &lt;/TestAncestor&gt;
-    &lt;/Or&gt;
     &lt;TestAncestor&gt;
-      &lt;TestId&gt;::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests.AVX2MinMaxInt64BitWorks&lt;/TestId&gt;
+      &lt;TestId&gt;::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests.GenericBitonicSortTest&lt;/TestId&gt;
+    &lt;/TestAncestor&gt;
+    &lt;TestAncestor&gt;
+      &lt;TestId&gt;::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests.T4GeneratedBitonicSortTest&lt;/TestId&gt;
     &lt;/TestAncestor&gt;
   &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String>
+	
+	
 	
 </wpf:ResourceDictionary>
