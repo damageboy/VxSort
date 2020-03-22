@@ -12,48 +12,24 @@ using static System.Runtime.Intrinsics.X86.Avx2;
 
 namespace TestBlog
 {
-    public class GenericBitonicSortTests
+
+    [TestFixture(typeof(int))]
+    [TestFixture(typeof(uint))]
+    [TestFixture(typeof(float))]
+
+    [TestFixture(typeof(long))]
+    [TestFixture(typeof(ulong))]
+    [TestFixture(typeof(double))]
+    public class GenericBitonicSortTests<T> where T : unmanaged
     {
-        static readonly int[] _bitonic32bSizes = {8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128};
-        static readonly int[] _bitonic64bSizes = {4,  8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48,  52,  56,  60,  64};
-        static readonly Type[] _bitonicTypes = { typeof(int), typeof(uint), typeof(float) };
+        static IEnumerable<int> BitonicSizes => Enumerable.Range(1, 16).Select(x => x * Vector256<T>.Count);
 
-        static IEnumerable<TestCaseData> IntTests =>
-            from size in _bitonic32bSizes
+        static IEnumerable<TestCaseData> ConstantSeedTests =>
+            from size in BitonicSizes
             from seed in new[] {666, 333, 999, 314159}
-            select new GSortTestCaseData<int>(new SortTestGenerator<int>(() => DataGeneration.GenerateData<int>(size, seed))).SetArgDisplayNames($"int/{size:000}/{seed}");
+            select new GSortTestCaseData<T>(new SortTestGenerator<T>(() => DataGeneration.GenerateData<T>(size, seed))).SetArgDisplayNames($"{typeof(T)}/{size:000}/{seed}");
 
-        static IEnumerable<TestCaseData> UIntTests =>
-            from size in _bitonic32bSizes
-            from seed in new[] {666, 333, 999, 314159}
-            select new GSortTestCaseData<uint>(new SortTestGenerator<uint>(() => DataGeneration.GenerateData<uint>(size, seed))).SetArgDisplayNames($"uint/{size:000}/{seed}");
-
-        static IEnumerable<TestCaseData> FloatTests =>
-            from size in _bitonic32bSizes
-            from seed in new[] {666, 333, 999, 314159}
-            select new GSortTestCaseData<float>(new SortTestGenerator<float>(() => DataGeneration.GenerateData<float>(size, seed))).SetArgDisplayNames($"float/{size:000}/{seed}");
-
-        static IEnumerable<TestCaseData> DoubleTests =>
-            from size in _bitonic64bSizes
-            from seed in new[] {666, 333, 999, 314159}
-            select new GSortTestCaseData<double>(new SortTestGenerator<double>(() => DataGeneration.GenerateData<double>(size, seed))).SetArgDisplayNames($"double/{size:000}/{seed}");
-
-        static IEnumerable<TestCaseData> LongTests =>
-            from size in _bitonic64bSizes
-            from seed in new[] {666, 333, 999, 314159}
-            select new GSortTestCaseData<long>(new SortTestGenerator<long>(() => DataGeneration.GenerateData<long>(size, seed))).SetArgDisplayNames($"long/{size:000}/{seed}");
-
-        static IEnumerable<TestCaseData> ULongTests =>
-            from size in _bitonic64bSizes
-            from seed in new[] {666, 333, 999, 314159}
-            select new GSortTestCaseData<ulong>(new SortTestGenerator<ulong>(() => DataGeneration.GenerateData<ulong>(size, seed))).SetArgDisplayNames($"ulong/{size:000}/{seed}");
-
-        [TestCaseSourceGeneric(nameof(IntTests),    TypeArguments = new[] { typeof(int)}   )]
-        [TestCaseSourceGeneric(nameof(UIntTests),   TypeArguments = new[] { typeof(uint)}  )]
-        [TestCaseSourceGeneric(nameof(FloatTests),  TypeArguments = new[] { typeof(float)} )]
-        [TestCaseSourceGeneric(nameof(DoubleTests), TypeArguments = new[] { typeof(double)})]
-        [TestCaseSourceGeneric(nameof(LongTests),   TypeArguments = new[] { typeof(long)}  )]
-        [TestCaseSourceGeneric(nameof(ULongTests),  TypeArguments = new[] { typeof(ulong)} )]
+        [TestCaseSource(nameof(ConstantSeedTests))]
         public unsafe void GenericBitonicSortTest<T>(SortTestGenerator<T> dg) where T : unmanaged
         {
             var (randomData, sortedData, reproContext) = dg.Generator();
@@ -66,12 +42,7 @@ namespace TestBlog
             Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
         }
 
-        [TestCaseSourceGeneric(nameof(IntTests),    TypeArguments = new[] { typeof(int)}   )]
-        [TestCaseSourceGeneric(nameof(UIntTests),   TypeArguments = new[] { typeof(uint)}  )]
-        [TestCaseSourceGeneric(nameof(FloatTests),  TypeArguments = new[] { typeof(float)} )]
-        [TestCaseSourceGeneric(nameof(DoubleTests), TypeArguments = new[] { typeof(double)})]
-        [TestCaseSourceGeneric(nameof(LongTests),   TypeArguments = new[] { typeof(long)}  )]
-        [TestCaseSourceGeneric(nameof(ULongTests),  TypeArguments = new[] { typeof(ulong)} )]
+        [TestCaseSource(nameof(ConstantSeedTests))]
         public unsafe void T4GeneratedBitonicSortTest<T>(SortTestGenerator<T> dg) where T : unmanaged
         {
             var (randomData, sortedData, reproContext) = dg.Generator();

@@ -87,7 +87,6 @@ namespace Bench
         protected override int InvocationsPerIteration => InvocationsPerIterationValue;
         protected override int ArraySize => N;
 
-        //[Params(8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128)]
         [ParamsSource(nameof(BitonicSizes))]
         public int N;
 
@@ -103,6 +102,9 @@ namespace Bench
     [GenericTypeArguments(typeof(int))] // value type
     [GenericTypeArguments(typeof(uint))] // value type
     [GenericTypeArguments(typeof(float))] // value type
+    [GenericTypeArguments(typeof(long))]   // value type
+    [GenericTypeArguments(typeof(ulong))]  // value type
+    [GenericTypeArguments(typeof(double))] // value type
     [InvocationCount(InvocationsPerIterationValue)]
     [Config(typeof(SmallSortConfig))]
     public class GenericSmallSortBench<T> : SmallSortBenchBase<T> where T : unmanaged, IComparable<T>
@@ -111,7 +113,6 @@ namespace Bench
         protected override int InvocationsPerIteration => InvocationsPerIterationValue;
         protected override int ArraySize => N;
 
-        //[Params(8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128)]
         [ParamsSource(nameof(BitonicSizes))]
         public int N;
 
@@ -120,7 +121,7 @@ namespace Bench
         //[Benchmark(Baseline = true)]
         public unsafe void PCSort() => PositionCountingSort.Sort<T>((int *) _arrayPtrs[_iterationIndex++], N, (int *) _tmp);
 
-        [Benchmark]
+        //[Benchmark]
         public unsafe void GenericBitonicSort() => GenericBitonicSort<T>.Sort(_arrayPtrs[_iterationIndex++], N);
 
         [Benchmark]
