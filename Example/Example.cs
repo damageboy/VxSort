@@ -21,11 +21,12 @@ namespace Example
             Unmanaged,
             PCSort256,
             BitonicSort,
-            DoublePumpMicroOpt,
             DoublePumpNaive,
+            DoublePumpMicroOpt,
+            DoublePumpMicroOptCutoff_40,
+            DoublePumpSimpleBranch,
             DoublePumpAligned,
             DoublePumpOverlined,
-            DoublePumpOverlinedSimplerBranch,
             DoublePumpOverlinedBranchless,
             DoublePumpPCSort,
             DoublePumpOverlinedUnroll4PCSort,
@@ -96,9 +97,10 @@ namespace Example
                                     case Example.BitonicSort:                                 BitonicSort<int>.Sort(pCopy, s); break;
                                     case Example.DoublePumpNaive:                             DoublePumpNaive.Sort(orig); break;
                                     case Example.DoublePumpMicroOpt:                          DoublePumpMicroOpt.Sort(orig); break;
+				    case Example.DoublePumpMicroOptCutoff_40:                 DoublePumpMicroOptCutoff_40.Sort(orig); break;
+                                    case Example.DoublePumpSimpleBranch:                      DoublePumpSimpleBranch.Sort(orig); break;
                                     case Example.DoublePumpAligned:                           DoublePumpAligned.Sort(orig); break;
                                     case Example.DoublePumpOverlined:                         DoublePumpOverlined.Sort(orig); break;
-                                    case Example.DoublePumpOverlinedSimplerBranch:            DoublePumpOverlinedSimplerBranch.Sort(orig); break;
                                     case Example.DoublePumpOverlinedBranchless:               DoublePumpOverlinedBranchless.Sort(orig); break;
                                     case Example.DoublePumpPCSort:                            DoublePumpOverlinedPCSort.Sort(orig); break;
                                     case Example.DoublePumpOverlinedUnroll4PCSort:            DoublePumpOverlinedUnroll4PCSort.Sort(orig); break;

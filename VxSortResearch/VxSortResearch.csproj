@@ -8,8 +8,6 @@
   <ItemGroup>
     <PackageReference Include="Fody" />
     <PackageReference Include="LocalsInit.Fody" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" />
-    <PackageReference Include="Microsoft.CodeQuality.Analyzers" />
   </ItemGroup>
 
   <ItemGroup>

@@ -93,7 +93,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
             public VxSortInt32(int* startPtr, int* endPtr) : this()
             {
                 Debug.Assert(SMALL_SORT_THRESHOLD_ELEMENTS >= PARTITION_TMP_SIZE_IN_ELEMENTS);
-                _depth     = 0;
+                _depth    = 0;
                 _startPtr = startPtr;
                 _endPtr   = endPtr;
                 fixed (int* pTemp = _temp) {

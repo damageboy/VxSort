@@ -1,27 +1,35 @@
 using System;
 using System.Globalization;
-using System.Net.Http.Headers;
 using Bench.Utils;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
-using BenchmarkDotNet.Extensions;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Reports;
 using Perfolizer.Horology;
 using VxSortResearch.Unstable.AVX2.Happy;
 using VxSortResearch.Unstable.AVX2.Sad;
-using VxSortResearch.Unstable.Scalar;
 
 namespace Bench
 {
+    using SelectedConfig = MediumConfig;
+
+    static class BenchmarkConstants
+    {
+        public const int InvocationsPerIterationValue = 3;            
+    }
+
     class LongConfig : ManualConfig
     {
         public LongConfig()
         {
-            SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.GB, TimeUnit.Microsecond);
+            SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.B, TimeUnit.Microsecond);
             AddJob(Job.LongRun);
+            
             AddColumn(new TimePerNColumn());
+            AddColumn(SpeedupRatioColumn.SpeedupOfMedian);
+            AddExporter(new DatatableJsonExporter());
         }
     }
 
@@ -29,9 +37,16 @@ namespace Bench
     {
         public MediumConfig()
         {
-            SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.GB, TimeUnit.Microsecond);
+            SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.B, TimeUnit.Microsecond);
             AddJob(Job.MediumRun);
             AddColumn(new TimePerNColumn());
+            AddColumn(SpeedupRatioColumn.SpeedupOfMedian);
+            AddExporter(new DatatableJsonExporter());
+            AddDiagnoser(
+                new DisassemblyDiagnoser(
+                    new DisassemblyDiagnoserConfig(
+                        maxDepth: 4, // you can change it to a bigger value if you want to get more framework methods disassembled
+                        exportGithubMarkdown: true)));
         }
     }
 
@@ -39,16 +54,23 @@ namespace Bench
     {
         public ShortConfig()
         {
-            SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.GB, TimeUnit.Microsecond);
+            SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.B, TimeUnit.Microsecond);
             AddJob(Job.ShortRun);
             AddColumn(new TimePerNColumn());
+            AddColumn(SpeedupRatioColumn.SpeedupOfMedian);
+            AddExporter(new DatatableJsonExporter());
+            AddDiagnoser(
+                new DisassemblyDiagnoser(
+                    new DisassemblyDiagnoserConfig(
+                        maxDepth: 4, // you can change it to a bigger value if you want to get more framework methods disassembled
+                        exportGithubMarkdown: true)));
+
         }
     }
 
-
     public class QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
-        protected virtual int InvocationsPerIteration { get; }
+        protected virtual int InvocationsPerIteration => BenchmarkConstants.InvocationsPerIterationValue;
         protected int _iterationIndex = 0;
         T[] _values;
         protected T[][] _arrays;
@@ -67,15 +89,10 @@ namespace Bench
     }
 
     [GenericTypeArguments(typeof(int))] // value type
-    [InvocationCount(InvocationsPerIterationValue)]
-    [Config(typeof(MediumConfig))]
-    [DatatableJsonExporter]
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
     public class BlogPt1<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
-        const int InvocationsPerIterationValue = 3;
-
-        protected override int InvocationsPerIteration => InvocationsPerIterationValue;
-
         [Benchmark(Baseline=true)]
         public void ArraySort() => Array.Sort(_arrays[_iterationIndex++]);
 
@@ -87,15 +104,10 @@ namespace Bench
     }
 
     [GenericTypeArguments(typeof(int))] // value type
-    [InvocationCount(InvocationsPerIterationValue)]
-    [Config(typeof(MediumConfig))]
-    [DatatableJsonExporter]
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
     public class BlogPt3<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
-        const int InvocationsPerIterationValue = 3;
-
-        protected override int InvocationsPerIteration => InvocationsPerIterationValue;
-
         [Benchmark(Baseline=true)]
         public void ArraySort() => Array.Sort(_arrays[_iterationIndex++]);
 
@@ -104,32 +116,90 @@ namespace Bench
     }
 
     [GenericTypeArguments(typeof(int))] // value type
-    [InvocationCount(InvocationsPerIterationValue)]
-    [Config(typeof(MediumConfig))]
-    [DatatableJsonExporter]
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
     public class BlogPt4_1<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
-        const int InvocationsPerIterationValue = 3;
-
-        protected override int InvocationsPerIteration => InvocationsPerIterationValue;
-
         [Benchmark(Baseline = true)]
         public void Naive() => DoublePumpNaive.Sort(_arrays[_iterationIndex++]);
 
         [Benchmark]
         public void MicroOpt() => DoublePumpMicroOpt.Sort(_arrays[_iterationIndex++]);
     }
-
+    
     [GenericTypeArguments(typeof(int))] // value type
-    [InvocationCount(InvocationsPerIterationValue)]
-    [Config(typeof(MediumConfig))]
-    [DatatableJsonExporter]
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]    [Config(typeof(SelectedConfig))]
     public class BlogPt4_2<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
-        const int InvocationsPerIterationValue = 3;
+        [Benchmark(Baseline = true)]
+        public void MicroOpt() => DoublePumpMicroOpt.Sort(_arrays[_iterationIndex++]);
 
-        protected override int InvocationsPerIteration => InvocationsPerIterationValue;
+        [Benchmark]
+        public void MicroOpt_24() => DoublePumpMicroOptCutoff_24.Sort(_arrays[_iterationIndex++]);
+        
+        [Benchmark]
+        public void MicroOpt_32() => DoublePumpMicroOptCutoff_32.Sort(_arrays[_iterationIndex++]);
 
+        [Benchmark]
+        public void MicroOpt_40() => DoublePumpMicroOptCutoff_40.Sort(_arrays[_iterationIndex++]);
+
+        [Benchmark]
+        public void MicroOpt_48() => DoublePumpMicroOptCutoff_48.Sort(_arrays[_iterationIndex++]);
+    }
+    
+    [GenericTypeArguments(typeof(int))] // value type
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]    [Config(typeof(SelectedConfig))]
+    public class BlogPt4_3<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
+    {
+        [Benchmark(Baseline = true)]
+        public void MicroOpt_40() => DoublePumpMicroOptCutoff_40.Sort(_arrays[_iterationIndex++]);
+
+        [Benchmark]
+        public void SimpleBranch() => DoublePumpSimpleBranch.Sort(_arrays[_iterationIndex++]);
+    }
+    
+    [GenericTypeArguments(typeof(int))] // value type
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
+    public class BlogPt4_4<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
+    {
+        [Benchmark(Baseline = true)]
+        public void SimpleBranch() => DoublePumpSimpleBranch.Sort(_arrays[_iterationIndex++]);
+
+        [Benchmark]
+        public void Packed() => DoublePumpPacked.Sort(_arrays[_iterationIndex++]);
+    }
+    
+    [GenericTypeArguments(typeof(int))] // value type
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
+    public class BlogPt4_5<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
+    {
+        [Benchmark(Baseline = true)]
+        public void Packed() => DoublePumpPacked.Sort(_arrays[_iterationIndex++]);
+
+        [Benchmark]
+        public void Jedi() => DoublePumpJedi.Sort(_arrays[_iterationIndex++]);
+    }
+
+    [GenericTypeArguments(typeof(int))] // value type
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
+    public class BlogPt4_6<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
+    {
+        [Benchmark(Baseline = true)]
+        public void Naive() => DoublePumpNaive.Sort(_arrays[_iterationIndex++]);
+
+        [Benchmark]
+        public void Jedi() => DoublePumpJedi.Sort(_arrays[_iterationIndex++]);
+    }
+
+    
+    [GenericTypeArguments(typeof(int))] // value type
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
+    public class BlogPt5_1<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
+    {
         [Benchmark(Baseline=true)]
         public void MicroOpt() => DoublePumpMicroOpt.Sort(_arrays[_iterationIndex++]);
 
@@ -138,15 +208,10 @@ namespace Bench
     }
 
     [GenericTypeArguments(typeof(int))] // value type
-    [InvocationCount(InvocationsPerIterationValue)]
-    [Config(typeof(MediumConfig))]
-    [DatatableJsonExporter]
-    public class BlogPt4_3<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
+    public class BlogPt5_2<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
-        const int InvocationsPerIterationValue = 3;
-
-        protected override int InvocationsPerIteration => InvocationsPerIterationValue;
-
         [Benchmark(Baseline =true)]
         public void MicroOpt() => DoublePumpMicroOpt.Sort(_arrays[_iterationIndex++]);
 
@@ -161,15 +226,10 @@ namespace Bench
     }
 
     [GenericTypeArguments(typeof(int))] // value type
-    [InvocationCount(InvocationsPerIterationValue)]
-    [Config(typeof(MediumConfig))]
-    [DatatableJsonExporter]
-    public class BlogPt4_4<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
+    public class BlogPt6_1<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
-        const int InvocationsPerIterationValue = 3;
-
-        protected override int InvocationsPerIteration => InvocationsPerIterationValue;
-
         [Benchmark(Baseline = true)]
         public void AlignedOverlap() => DoublePumpOverlined.Sort(_arrays[_iterationIndex++]);
 
@@ -179,15 +239,10 @@ namespace Bench
 
 
     [GenericTypeArguments(typeof(int))] // value type
-    [InvocationCount(InvocationsPerIterationValue)]
-    [Config(typeof(MediumConfig))]
-    [DatatableJsonExporter]
-    public class BlogPt4_Final<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
+    public class BlogPt6_2<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
-        const int InvocationsPerIterationValue = 3;
-
-        protected override int InvocationsPerIteration => InvocationsPerIterationValue;
-
         [Benchmark(Baseline = true)]
         public void ArraySort() => Array.Sort(_arrays[_iterationIndex++]);
 
@@ -196,19 +251,13 @@ namespace Bench
     }
 
     [GenericTypeArguments(typeof(int))] // value type
-    [InvocationCount(InvocationsPerIterationValue)]
-    [Config(typeof(MediumConfig))]
-    [DatatableJsonExporter]
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
     public class BlogPt5<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
-        const int InvocationsPerIterationValue = 3;
-
-        protected override int InvocationsPerIteration => InvocationsPerIterationValue;
-
         [Benchmark(Baseline=true)]
         public void ArraySort() => Array.Sort(_arrays[_iterationIndex++]);
-
-
+        
         //[Benchmark(Baseline=true)]
         public void PCSort() => DoublePumpOverlinedPCSort.Sort(_arrays[_iterationIndex++]);
 
@@ -227,15 +276,10 @@ namespace Bench
     }
 
     [GenericTypeArguments(typeof(int))] // value type
-    [InvocationCount(InvocationsPerIterationValue)]
-    [Config(typeof(MediumConfig))]
-    [DatatableJsonExporter]
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
     public class BlogPt7<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
-        const int InvocationsPerIterationValue = 3;
-
-        protected override int InvocationsPerIteration => InvocationsPerIterationValue;
-
         //[Benchmark(Baseline =true)]
         public void ArraySort() => Array.Sort(_arrays[_iterationIndex++]);
 
@@ -253,15 +297,10 @@ namespace Bench
     }
 
     [GenericTypeArguments(typeof(int))] // value type
-    [InvocationCount(InvocationsPerIterationValue)]
-    [Config(typeof(MediumConfig))]
-    [DatatableJsonExporter]
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
     public class CrapCrap<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
-        const int InvocationsPerIterationValue = 3;
-
-        protected override int InvocationsPerIteration => InvocationsPerIterationValue;
-
         [Benchmark(Baseline = true)]
         public void AlignedOverlap() => DoublePumpOverlined.Sort(_arrays[_iterationIndex++]);
 

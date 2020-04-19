@@ -22,7 +22,7 @@ namespace Bench
         {
             SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.B, TimeUnit.Nanosecond);
             AddJob(Job.LongRun); //);.With(InProcessEmitToolchain.Instance));
-            AddColumn(SpeedupRatioColumn.SpeedupOfMean);
+            AddColumn(SpeedupRatioColumn.SpeedupOfMin);
             AddColumn(WorthinessRatioColumn.WorthinessOfMean);
             AddDiagnoser(
                 new DisassemblyDiagnoser(

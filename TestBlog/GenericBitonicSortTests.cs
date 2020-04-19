@@ -30,7 +30,7 @@ namespace TestBlog
             select new GSortTestCaseData<T>(new SortTestGenerator<T>(() => DataGeneration.GenerateData<T>(size, seed))).SetArgDisplayNames($"{typeof(T)}/{size:000}/{seed}");
 
         [TestCaseSource(nameof(ConstantSeedTests))]
-        public unsafe void GenericBitonicSortTest<T>(SortTestGenerator<T> dg) where T : unmanaged
+        public unsafe void GenericBitonicSortTest(SortTestGenerator<T> dg)
         {
             var (randomData, sortedData, reproContext) = dg.Generator();
 
@@ -43,7 +43,7 @@ namespace TestBlog
         }
 
         [TestCaseSource(nameof(ConstantSeedTests))]
-        public unsafe void T4GeneratedBitonicSortTest<T>(SortTestGenerator<T> dg) where T : unmanaged
+        public unsafe void T4GeneratedBitonicSortTest(SortTestGenerator<T> dg)
         {
             var (randomData, sortedData, reproContext) = dg.Generator();
 

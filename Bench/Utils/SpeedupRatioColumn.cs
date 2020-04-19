@@ -14,12 +14,14 @@ namespace Bench.Utils
     {
         public enum RatioMetric
         {
+            Min,
             Mean,
-            StdDev
+            Median,
         }
 
+        public static readonly IColumn SpeedupOfMin = new SpeedupRatioColumn(RatioMetric.Min);
         public static readonly IColumn SpeedupOfMean = new SpeedupRatioColumn(RatioMetric.Mean);
-        public static readonly IColumn SpeedupStdDev = new SpeedupRatioColumn(RatioMetric.StdDev);
+        public static readonly IColumn SpeedupOfMedian = new SpeedupRatioColumn(RatioMetric.Median);
 
         public RatioMetric Metric { get; }
 
@@ -32,17 +34,13 @@ namespace Bench.Utils
 
         public override string ColumnName
         {
-            get
-            {
-                switch (Metric)
-                {
-                    case RatioMetric.Mean:
-                        return "Speedup";
-                    case RatioMetric.StdDev:
-                        return "SpeedupSD";
-                    default:
-                        throw new NotSupportedException();
-                }
+            get {
+                return Metric switch {
+                    RatioMetric.Mean   => "SpeedupMean",
+                    RatioMetric.Min    => "SpeedupMin",
+                    RatioMetric.Median => "SpeedupMedian",
+                    _                  => throw new NotSupportedException()
+                };
             }
         }
 
@@ -55,15 +53,18 @@ namespace Bench.Utils
                 return "NA";
 
             var cultureInfo = summary.GetCultureInfo();
-            switch (Metric)
-            {
-                case RatioMetric.Mean:
-                    return IsNonBaselinesPrecise(summary, baseline, benchmarkCase) ? ratio.Mean.ToString("N3", cultureInfo) : ratio.Mean.ToString("N2", cultureInfo);
-                case RatioMetric.StdDev:
-                    return ratio.StandardDeviation.ToString("N2", cultureInfo);
-                default:
-                    throw new NotSupportedException();
-            }
+            return Metric switch {
+                RatioMetric.Mean => IsNonBaselinesPrecise(summary, baseline, benchmarkCase)
+                    ? ratio.Mean.ToString("N3", cultureInfo)
+                    : ratio.Mean.ToString("N2", cultureInfo),
+                RatioMetric.Min => IsNonBaselinesPrecise(summary, baseline, benchmarkCase)
+                    ? ratio.Min.ToString("N3", cultureInfo)
+                    : ratio.Min.ToString("N2", cultureInfo),
+                RatioMetric.Median => IsNonBaselinesPrecise(summary, baseline, benchmarkCase)
+                    ? ratio.Median.ToString("N3", cultureInfo)
+                    : ratio.Median.ToString("N2", cultureInfo),
+                _ => throw new NotSupportedException()
+            };
         }
 
         private static bool IsNonBaselinesPrecise(Summary summary, Statistics baselineStat, BenchmarkCase benchmarkCase)
@@ -96,17 +97,13 @@ namespace Bench.Utils
 
         public override string Legend
         {
-            get
-            {
-                switch (Metric)
-                {
-                    case RatioMetric.Mean:
-                        return "Mean of the ratio distribution ([Current]/[Baseline])";
-                    case RatioMetric.StdDev:
-                        return "Standard deviation of the ratio distribution ([Current]/[Baseline])";
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(Metric));
-                }
+            get {
+                return Metric switch {
+                    RatioMetric.Min    => "Speedup of the minimum execution times ([Current]/[Baseline])",
+                    RatioMetric.Mean   => "Speedup of the mean execution times ([Current]/[Baseline])",
+                    RatioMetric.Median => "Speedup of the median execution times ([Current]/[Baseline])",
+                    _                  => throw new ArgumentOutOfRangeException(nameof(Metric))
+                };
             }
         }
     }

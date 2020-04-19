@@ -130,7 +130,48 @@ namespace TestBlog
             Assert.That(randomData, Is.Ordered, reproContext);
             Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
         }
+        
+        [TestCaseSource(nameof(AllTests))]
+        public void DoublePumpMicroOptCutoff_40Test(DataGenerator generator)
+        {
+            var (randomData, sortedData, reproContext) = generator();
+            DoublePumpMicroOptCutoff_40.Sort(randomData);
 
+            Assert.That(randomData, Is.Ordered,             reproContext);
+            Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
+        }
+        
+        
+        [TestCaseSource(nameof(AllTests))]
+        public void DoublePumpSimpleBranchTest(DataGenerator generator)
+        {
+            var (randomData, sortedData, reproContext) = generator();
+            DoublePumpSimpleBranch.Sort(randomData);
+
+            Assert.That(randomData, Is.Ordered,             reproContext);
+            Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
+        }
+        
+        [TestCaseSource(nameof(AllTests))]
+        public void DoublePumpPackedTest(DataGenerator generator)
+        {
+            var (randomData, sortedData, reproContext) = generator();
+            DoublePumpPacked.Sort(randomData);
+
+            Assert.That(randomData, Is.Ordered,             reproContext);
+            Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
+        }
+
+        [TestCaseSource(nameof(AllTests))]
+        public void DoublePumpJediTest(DataGenerator generator)
+        {
+            var (randomData, sortedData, reproContext) = generator();
+            DoublePumpJedi.Sort(randomData);
+
+            Assert.That(randomData, Is.Ordered,             reproContext);
+            Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
+        }
+        
         [TestCaseSource(nameof(AllTests))]
         public void DoublePumpAlignedTest(DataGenerator generator)
         {
@@ -150,17 +191,7 @@ namespace TestBlog
             Assert.That(randomData, Is.Ordered,             reproContext);
             Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
         }
-
-        [TestCaseSource(nameof(AllTests))]
-        public void DoublePumpOverlinedSimplerBranchTest(DataGenerator generator)
-        {
-            var (randomData, sortedData, reproContext) = generator();
-            DoublePumpOverlinedSimplerBranch.Sort(randomData);
-
-            Assert.That(randomData, Is.Ordered,             reproContext);
-            Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
-        }
-
+        
         [TestCaseSource(nameof(AllTests))]
         public void DoublePumpOverlinedBranchlessTest(DataGenerator generator)
         {

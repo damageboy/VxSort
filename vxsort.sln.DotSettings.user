@@ -5,21 +5,54 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
   &lt;Assembly Path="/home/dmg/.nuget/packages/newtonsoft.json/12.0.3-beta2/lib/netstandard2.0/Newtonsoft.Json.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=12d8ff82_002Dcd7b_002D4ef3_002D90fa_002Dd68ae9a26831/@EntryIndexedValue">&lt;SessionState ContinuousTestingIsOn="False" ContinuousTestingMode="0" FrameworkVersion="{x:Null}" IsLocked="False" Name="T4GeneratedBitonicSortTest" PlatformMonoPreference="{x:Null}" PlatformType="{x:Null}" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"&gt;
-  &lt;TestAncestor&gt;
-    &lt;TestId&gt;::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;Int32&amp;gt;.T4GeneratedBitonicSortTest&lt;/TestId&gt;
-    &lt;TestId&gt;::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;UInt32&amp;gt;.T4GeneratedBitonicSortTest&lt;/TestId&gt;
-    &lt;TestId&gt;::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;Single&amp;gt;.T4GeneratedBitonicSortTest&lt;/TestId&gt;
-    &lt;TestId&gt;::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;Int64&amp;gt;.T4GeneratedBitonicSortTest&lt;/TestId&gt;
-    &lt;TestId&gt;::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;UInt64&amp;gt;.T4GeneratedBitonicSortTest&lt;/TestId&gt;
-    &lt;TestId&gt;::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;Double&amp;gt;.T4GeneratedBitonicSortTest&lt;/TestId&gt;
-  &lt;/TestAncestor&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=77e347a7_002D2470_002D4acd_002D84f3_002Da9d22cc0968b/@EntryIndexedValue">&lt;SessionState ContinuousTestingIsOn="False" ContinuousTestingMode="0" FrameworkVersion="{x:Null}" IsLocked="False" Name="DoublePumpMicroOptTest" PlatformMonoPreference="{x:Null}" PlatformType="{x:Null}" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"&gt;
+  &lt;Or&gt;
+    &lt;Or&gt;
+      &lt;Or&gt;
+        &lt;Or&gt;
+          &lt;Or&gt;
+            &lt;Or&gt;
+              &lt;TestAncestor&gt;
+                &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.UnstableParityTests.DoublePumpMicroOptTest&lt;/TestId&gt;
+              &lt;/TestAncestor&gt;
+              &lt;TestAncestor&gt;
+                &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.UnstableParityTests.DoublePumpMicroOptCutoff_32Test&lt;/TestId&gt;
+              &lt;/TestAncestor&gt;
+            &lt;/Or&gt;
+            &lt;TestAncestor&gt;
+              &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.UnstableParityTests.DoublePumpOverlinedSimplerBranchTest&lt;/TestId&gt;
+            &lt;/TestAncestor&gt;
+          &lt;/Or&gt;
+          &lt;TestAncestor&gt;
+            &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.UnstableParityTests.DoublePumpMicroOptCutoff_40Test&lt;/TestId&gt;
+          &lt;/TestAncestor&gt;
+        &lt;/Or&gt;
+        &lt;TestAncestor&gt;
+          &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.UnstableParityTests.DoublePumpSimpleBranchTest&lt;/TestId&gt;
+        &lt;/TestAncestor&gt;
+      &lt;/Or&gt;
+      &lt;TestAncestor&gt;
+        &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.UnstableParityTests.DoublePumpPackedTest&lt;/TestId&gt;
+      &lt;/TestAncestor&gt;
+    &lt;/Or&gt;
+    &lt;TestAncestor&gt;
+      &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.UnstableParityTests.DoublePumpLEATest&lt;/TestId&gt;
+    &lt;/TestAncestor&gt;
+  &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=dd085ff1_002D4aad_002D4c96_002Da9a2_002Dc1bdffd206bb/@EntryIndexedValue">&lt;SessionState ContinuousTestingIsOn="False" ContinuousTestingMode="0" FrameworkVersion="{x:Null}" IsLocked="False" Name="GenericBitonicSortTest" PlatformMonoPreference="{x:Null}" PlatformType="{x:Null}" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"&gt;
-  &lt;TestAncestor&gt;
-    &lt;TestId&gt;::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;T&amp;gt;&lt;/TestId&gt;
-  &lt;/TestAncestor&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=bfde9c96_002Da076_002D487b_002D8b26_002D75fe4688b51b/@EntryIndexedValue">&lt;SessionState ContinuousTestingIsOn="False" ContinuousTestingMode="0" FrameworkVersion="{x:Null}" IsLocked="False" Name="DoublePumpNaiveTest" PlatformMonoPreference="{x:Null}" PlatformType="{x:Null}" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"&gt;
+  &lt;Or&gt;
+    &lt;TestAncestor&gt;
+      &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.UnstableParityTests.DoublePumpNaiveTest&lt;/TestId&gt;
+    &lt;/TestAncestor&gt;
+    &lt;TestAncestor&gt;
+      &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.UnstableParityTests.DoublePumpMicroOptTest&lt;/TestId&gt;
+    &lt;/TestAncestor&gt;
+  &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String>
+	
+	
+	
 	
 	
 	

@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
+using LocalsInit;
 using VxSortResearch.PermutationTables;
 using VxSortResearch.Statistics;
 using VxSortResearch.Utils;
@@ -11,8 +12,7 @@ using static System.Runtime.Intrinsics.X86.Popcnt;
 
 namespace VxSortResearch.Unstable.AVX2.Happy
 {
-    using ROS = ReadOnlySpan<int>;
-
+    [LocalsInit(true)]
     public static class DoublePumpNaive
     {
         public static unsafe void Sort<T>(T[] array) where T : unmanaged, IComparable<T>
@@ -174,6 +174,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
 
                 // Go to insertion sort below this threshold
                 if (length <= SMALL_SORT_THRESHOLD_ELEMENTS + 1) {
+                    Dbg($"Going for Insertion Sort on [{left - _startPtr} -> {right - _startPtr - 1}]");
                     InsertionSort(left, right);
                     return;
                 }
@@ -202,7 +203,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 Swap(mid, right);
 
                 var sep = VectorizedPartitionInPlace(left, right);
-                
+
                 Stats.BumpDepth(1);
                 _depth++;
                 Sort( left, sep - 1, depthLimit);
@@ -216,7 +217,6 @@ namespace VxSortResearch.Unstable.AVX2.Happy
             /// </summary>
             /// <param name="left">pointer to the first element to partition</param>
             /// <param name="right">pointer to the last element to partition, also points to where the pivot was placed for partitioning</param>
-            /// <param name="tmp">pointer to some slack space being passed around</param>
             /// <returns>Position of the pivot that was passed to the function inside the array</returns>
             [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             int* VectorizedPartitionInPlace(int* left, int* right)
@@ -261,20 +261,19 @@ namespace VxSortResearch.Unstable.AVX2.Happy
 
                 var N = Vector256<int>.Count; // treated as constant by the JIT
                 var pivot = *right;
-                var P = Vector256.Create(pivot);
-                Trace($"pivot Vector256 is: {P}");
 
                 var tmpLeft = _tempStart;
                 var tmpRight = _tempEnd - N;
+                var writeLeft = left;
+                var writeRight = right - N - 1;
 
                 var pBase = Int32PermTables.IntPermTablePtr;
-
+                var P = Vector256.Create(pivot);
+                Trace($"pivot Vector256 is: {P}");
+                
                 Stats.BumpVectorizedPartitionBlocks(2);
                 PartitionBlock(left         , P, pBase, ref tmpLeft, ref tmpRight);
                 PartitionBlock(right - N - 1, P, pBase, ref tmpLeft, ref tmpRight);
-
-                var writeLeft = left;
-                var writeRight = right - N - 1;
 
                 var readLeft = left + N;
                 var readRight = right - 2*N - 1;
@@ -315,15 +314,15 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                         *--tmpRight = v;
                     }
 
-                    Trace($"RL:{readLeft - left} 🡄 🡆 RR:{readRight - left}");
+                    Trace($"RL:{readLeft - left} 🡄🡆 RR:{readRight - left}");
                 }
 
                 var leftTmpSize = (uint) (int)(tmpLeft - _tempStart);
-                Trace($"Copying back tmpLeft -> [{writeLeft - left}-{writeLeft - left + leftTmpSize})|{new ROS(_tempStart, (int) leftTmpSize).Dump()}");
+                Trace($"Copying back tmpLeft -> [{writeLeft - left}-{writeLeft - left + leftTmpSize})");
                 Unsafe.CopyBlockUnaligned(writeLeft, _tempStart, leftTmpSize*sizeof(int));
                 writeLeft += leftTmpSize;
                 var rightTmpSize = (uint) (int) (_tempEnd - tmpRight);
-                Trace($"Copying back tmpRight -> [{writeLeft - left}-{writeLeft - left + rightTmpSize})|{new ROS(tmpRight, (int) rightTmpSize).Dump()}");
+                Trace($"Copying back tmpRight -> [{writeLeft - left}-{writeLeft - left + rightTmpSize})");
                 Unsafe.CopyBlockUnaligned(writeLeft, tmpRight, rightTmpSize*sizeof(int));
 
                 // Shove to pivot back to the boundary

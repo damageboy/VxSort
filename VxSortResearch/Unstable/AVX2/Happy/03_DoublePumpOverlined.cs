@@ -27,9 +27,9 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 // Yes this looks horrid, but the C# JIT will happily elide
                 // the irrelevant code per each type being compiled, so we're good
                 if (typeof(T) == typeof(int)) {
-                    var pInt = (int*) p;
-                    var sorter = new VxSortInt32(startPtr: pInt, endPtr: pInt + array.Length - 1);
-                    sorter.Sort(pInt, pInt + array.Length - 1, VxSortInt32.REALIGN_BOTH);
+                    var left = (int*) p;
+                    var sorter = new VxSortInt32(startPtr: left, endPtr: left + array.Length - 1);
+                    sorter.Sort(left, left + array.Length - 1, VxSortInt32.REALIGN_BOTH);
                 }
             }
         }
@@ -37,7 +37,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
         static unsafe void Swap<TX>(TX *left, TX *right) where TX : unmanaged, IComparable<TX>
         {
             var tmp = *left;
-            *left = *right;
+            *left  = *right;
             *right = tmp;
         }
 
@@ -86,14 +86,14 @@ namespace VxSortResearch.Unstable.AVX2.Happy
             readonly int* _tempEnd;
 #pragma warning disable 649
             fixed int _temp[PARTITION_TMP_SIZE_IN_ELEMENTS];
-            int depth;
+            int _depth;
 #pragma warning restore 649
             internal long Length => _endPtr - _startPtr + 1;
 
             public VxSortInt32(int* startPtr, int* endPtr) : this()
             {
                 Debug.Assert(SMALL_SORT_THRESHOLD_ELEMENTS >= PARTITION_TMP_SIZE_IN_ELEMENTS);
-                depth     = 0;
+                _depth    = 0;
                 _startPtr = startPtr;
                 _endPtr   = endPtr;
                 fixed (int* pTemp = _temp) {
@@ -190,11 +190,11 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 var sep = VectorizedPartitionInPlace(left, right, hint);
 
                 Stats.BumpDepth(1);
-                depth++;
+                _depth++;
                 Sort(left, sep - 2, hint | REALIGN_RIGHT);
                 Sort(sep, right, hint | REALIGN_LEFT);
                 Stats.BumpDepth(-1);
-                depth--;
+                _depth--;
             }
 
             /// <summary>
@@ -524,21 +524,21 @@ namespace VxSortResearch.Unstable.AVX2.Happy
             {
                 for (var t = left; t < boundary; t++)
                     if (!(*t <= pivot)) {
-                        Dbg($"depth={depth} boundary={boundary-left}, idx = {t - left} *t({*t}) <= pivot={pivot}");
-                        Debug.Assert(*t <= pivot, $"depth={depth} boundary={boundary-left}, idx = {t - left} *t({*t}) <= pivot={pivot}");
+                        Dbg($"depth={_depth} boundary={boundary-left}, idx = {t - left} *t({*t}) <= pivot={pivot}");
+                        Debug.Assert(*t <= pivot, $"depth={_depth} boundary={boundary-left}, idx = {t - left} *t({*t}) <= pivot={pivot}");
                     }
                 for (var t = boundary; t <= right; t++)
                     if (!(*t >= pivot)) {
-                        Dbg($"depth={depth} boundary={boundary-left}, idx = {t - left} *t({*t}) >= pivot={pivot}");
-                        Debug.Assert(*t >= pivot, $"depth={depth} boundary={boundary-left}, idx = {t - left} *t({*t}) >= pivot={pivot}");
+                        Dbg($"depth={_depth} boundary={boundary-left}, idx = {t - left} *t({*t}) >= pivot={pivot}");
+                        Debug.Assert(*t >= pivot, $"depth={_depth} boundary={boundary-left}, idx = {t - left} *t({*t}) >= pivot={pivot}");
                     }
             }
 
             [Conditional("DEBUG")]
-            void Dbg(string d) => Console.WriteLine($"{depth}> {d}");
+            void Dbg(string d) => Console.WriteLine($"{_depth}> {d}");
 
             [Conditional("DEBUG")]
-            void Trace(string d) => Console.WriteLine($"{depth}> {d}");
+            void Trace(string d) => Console.WriteLine($"{_depth}> {d}");
         }
     }
 }

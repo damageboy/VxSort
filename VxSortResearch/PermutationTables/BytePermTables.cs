@@ -786,12 +786,22 @@ namespace VxSortResearch.PermutationTables
             0x00, 0x81, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, // 0b11111111 (255)|Right-PC: 8
         };
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe Vector256<int> GetBytePermutation(byte * pBase, uint index)
         {
             Debug.Assert(index <= 255);
             Debug.Assert(pBase != null);
             return Avx2.ConvertToVector256Int32(pBase + index * 8);
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static unsafe Vector256<int> GetBytePermutation(byte * pBase, ulong index)
+        {
+            Debug.Assert(index <= 255);
+            Debug.Assert(pBase != null);
+            return Avx2.ConvertToVector256Int32(pBase + index * 8);
+        }
+        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Vector256<int> GetBytePermutationAligned(byte * pBase, uint index)
