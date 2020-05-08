@@ -173,7 +173,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 }
 
                 // Go to insertion sort below this threshold
-                if (length <= SMALL_SORT_THRESHOLD_ELEMENTS + 1) {
+                if (length <= SMALL_SORT_THRESHOLD_ELEMENTS) {
                     Dbg($"Going for Insertion Sort on [{left - _startPtr} -> {right - _startPtr - 1}]");
                     InsertionSort(left, right);
                     return;

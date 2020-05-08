@@ -129,7 +129,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
         internal unsafe ref struct VxSortInt32
         {
             const int SLACK_PER_SIDE_IN_ELEMENTS = SLACK_PER_SIDE_IN_VECTORS * 8;
-            const int SMALL_SORT_THRESHOLD_ELEMENTS = 40;            
+            const int SMALL_SORT_THRESHOLD_ELEMENTS = 40;
             const int TMP_SIZE_IN_ELEMENTS = 2 * SLACK_PER_SIDE_IN_ELEMENTS + 8;
 
             readonly int* _startPtr,  _endPtr,
@@ -154,6 +154,8 @@ namespace VxSortResearch.Unstable.AVX2.Happy
 
             internal void Sort(int* left, int* right, int depthLimit)
             {
+                Debug.Assert(left <= right);
+
                 var length = (int) (right - left + 1);
 
                 int* mid;
@@ -173,7 +175,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 }
 
                 // Go to insertion sort below this threshold
-                if (length <= SMALL_SORT_THRESHOLD_ELEMENTS + 1) {
+                if (length <= SMALL_SORT_THRESHOLD_ELEMENTS) {
                     Dbg($"Going for Insertion Sort on [{left - _startPtr} -> {right - _startPtr - 1}]");
                     InsertionSort(left, right);
                     return;
@@ -338,7 +340,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
 #if !DEBUG
             static
 #endif
-                void PartitionBlock(int *dataPtr, Vector256<int> P, byte* pBase, ref int* writeLeft, ref int* writeRight)
+            void PartitionBlock(int *dataPtr, Vector256<int> P, byte* pBase, ref int* writeLeft, ref int* writeRight)
             {
 #if DEBUG
                 var that = this;
