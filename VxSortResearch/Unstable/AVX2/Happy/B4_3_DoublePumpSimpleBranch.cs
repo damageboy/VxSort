@@ -30,7 +30,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 }
             }
         }
-        
+
         static int FloorLog2PlusOne(int n)
         {
             var result = 0;
@@ -41,7 +41,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
             }
             return result;
         }
-        
+
         static unsafe void Swap<TX>(TX *left, TX *right) where TX : unmanaged, IComparable<TX>
         {
             var tmp = *left;
@@ -79,7 +79,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 *(j + 1) = t;
             }
         }
-        
+
         static void HeapSort<TX>(Span<TX> keys) where TX : unmanaged, IComparable<TX>
         {
             Debug.Assert(!keys.IsEmpty);
@@ -129,7 +129,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
         internal unsafe ref struct VxSortInt32
         {
             const int SLACK_PER_SIDE_IN_ELEMENTS = SLACK_PER_SIDE_IN_VECTORS * 8;
-            const int SMALL_SORT_THRESHOLD_ELEMENTS = 40;            
+            const int SMALL_SORT_THRESHOLD_ELEMENTS = 40;
             const int TMP_SIZE_IN_ELEMENTS = 2 * SLACK_PER_SIDE_IN_ELEMENTS + 8;
 
             readonly int* _startPtr,  _endPtr,
@@ -178,7 +178,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                     InsertionSort(left, right);
                     return;
                 }
-                
+
                 // Detect a whole bunch of bad cases where partitioning
                 // will not do well:
                 // 1. Reverse sorted array
@@ -190,7 +190,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                     return;
                 }
                 depthLimit--;
-                
+
                 // Compute median-of-three, of:
                 // the first, mid and one before last elements
                 mid = left + ((right - left) / 2);
@@ -224,47 +224,12 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 Stats.BumpPartitionOperations();
                 Debug.Assert(right - left >= SLACK_PER_SIDE_IN_ELEMENTS * 2);
                 Dbg($"{nameof(VectorizedPartitionInPlace)}: [{left - _startPtr}-{right - _startPtr}]({right - left + 1})");
-                // Vectorized double-pumped (dual-sided) partitioning:
-                // We start with picking a pivot using the media-of-3 "method"
-                // Once we have sensible pivot stored as the last element of the array
-                // We process the array from both ends.
-                //
-                // To get this rolling, we first read 2 Vector256 elements from the left and
-                // another 2 from the right, and store them in some temporary space
-                // in order to leave enough "space" inside the vector for storing partitioned values.
-                // Why 2 from each side? Because we need n+1 from each side
-                // where n is the number of Vector256 elements we process in each iteration...
-                // The reasoning behind the +1 is because of the way we decide from *which*
-                // side to read, we may end up reading up to one more vector from any given side
-                // and writing it in its entirety to the opposite side (this becomes slightly clearer
-                // when reading the code below...)
-                // Conceptually, the bulk of the processing looks like this after clearing out some initial
-                // space as described above:
-
-                // [.............................................................................]
-                //  ^wl          ^rl                                               rr^        wr^
-                // Where:
-                // wl = writeLeft
-                // rl = readLeft
-                // rr = readRight
-                // wr = writeRight
-
-                // In every iteration, we select what side to read from based on how much
-                // space is left between head read/write pointer on each side...
-                // We read from where there is a smaller gap, e.g. that side
-                // that is closer to the unfortunate possibility of its write head overwriting
-                // its read head... By reading from THAT side, we're ensuring this does not happen
-
-                // An additional unfortunate complexity we need to deal with is that the right pointer
-                // must be decremented by another Vector256<T>.Count elements
-                // Since the Load/Store primitives obviously accept start addresses
-
                 var N = Vector256<int>.Count; // treated as constant by the JIT
                 var pivot = *right;
 
                 var tmpLeft = _tempStart;
                 var tmpRight = _tempEnd - N;
-                
+
                 var pBase = Int32PermTables.IntPermTablePtr;
                 var P = Vector256.Create(pivot);
                 Trace($"pivot Vector256 is: {P}");
@@ -281,7 +246,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 while (readRight >= readLeft) {
                     Stats.BumpScalarCompares();
                     Stats.BumpVectorizedPartitionBlocks();
-                    
+
                     int* nextPtr;
                     if ((byte *) writeRight - (byte *) readRight < N * sizeof(int)) {
                         nextPtr   =  readRight;
