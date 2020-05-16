@@ -12,8 +12,8 @@ using static System.Runtime.Intrinsics.X86.Avx2;
 using static System.Runtime.Intrinsics.X86.Popcnt;
 using static System.Runtime.Intrinsics.X86.Popcnt.X64;
 using static System.Runtime.Intrinsics.X86.Bmi2.X64;
-using static VxSortResearch.PermutationTables.BitPermTables;
-using static VxSortResearch.PermutationTables.Int32PermTables;
+using static VxSortResearch.PermutationTables.Int32.BitPermTables;
+using static VxSortResearch.PermutationTables.Int32.Int32PermTables;
 
 namespace VxSortResearch.Unstable.AVX2.Sad
 {

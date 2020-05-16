@@ -9,7 +9,7 @@ namespace VxSortResearch.Unstable.SmallSort
 {
     using V = Vector256<int>;
 
-    internal static partial class BitonicSort<T> where T : unmanaged
+    internal static partial class BitonicSortOpt<T> where T : unmanaged
     {
         // Legend:
         // X - shuffle/permute mask for generating a cross (X) shuffle
@@ -43,7 +43,7 @@ namespace VxSortResearch.Unstable.SmallSort
         // BitonicSort3V will be directly embedded in BitonicSort{7,11}V
         // etc.
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static void BitonicSort01V(ref V d)
+        public static void BitonicSort01VAscending(ref V d)
         {
             // ReSharper disable JoinDeclarationAndInitializer
             V min, max, s;
@@ -80,6 +80,44 @@ namespace VxSortResearch.Unstable.SmallSort
             d   = Blend(min, max,  B_1);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static void BitonicSort01VDescending(ref V d)
+        {
+            // ReSharper disable JoinDeclarationAndInitializer
+            V min, max, s;
+            // ReSharper restore JoinDeclarationAndInitializer
+            s   = Shuffle(d, X_1);
+            min = Min(s, d);
+            max = Max(s, d);
+            d   = Blend(max, min, B_1);
+
+            s   = Shuffle(d, X_R);
+            min = Min(s, d);
+            max = Max(s, d);
+            d   = Blend(max, min, B_2);
+
+            s   = Shuffle(d, X_1);
+            min = Min(s, d);
+            max = Max(s, d);
+            d   = Blend(max, min, B_1);
+
+            s   = Shuffle(d, X_R);
+            s   = Permute4x64(s.AsInt64(), P_X).AsInt32();
+            min = Min(s, d);
+            max = Max(s, d);
+            d   = Blend(max, min, B_4);
+
+            s   = Shuffle(d, X_2);
+            min = Min(s, d);
+            max = Max(s, d);
+            d   = Blend(max, min, B_2);
+
+            s   = Shuffle(d, X_1);
+            min = Min(s, d);
+            max = Max(s, d);
+            d   = Blend(max, min, B_1);
+        }
+
         // Basic bitonic 8-element merge
         // This will get composed and inlined throughout
         // the code base for merging larger sized bitonic sorts temporary result states
@@ -87,7 +125,7 @@ namespace VxSortResearch.Unstable.SmallSort
         // BitonicSort2VFinish used for BitonicSort{3,4,6,10}V{,Finish}
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        static void BitonicSort01VMerge(ref V d)
+        static void BitonicSort01VMergeAscending(ref V d)
         {
             // ReSharper disable JoinDeclarationAndInitializer
             V min, max, s;
@@ -107,6 +145,30 @@ namespace VxSortResearch.Unstable.SmallSort
             min = Min(s, d);
             max = Max(s, d);
             d   = Blend(min, max, B_1);
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        static void BitonicSort01VMergeDescending(ref V d)
+        {
+            // ReSharper disable JoinDeclarationAndInitializer
+            V min, max, s;
+            // ReSharper restore JoinDeclarationAndInitializer
+
+            s   = Permute4x64(d.AsInt64(), P_X).AsInt32();
+            min = Min(s, d);
+            max = Max(s, d);
+            d   = Blend(max, min, B_4);
+
+            s   = Shuffle(d, X_2);
+            min = Min(s, d);
+            max = Max(s, d);
+            d   = Blend(max, min, B_2);
+
+            s   = Shuffle(d, X_1);
+            min = Min(s, d);
+            max = Max(s, d);
+            d   = Blend(max, min, B_1);
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using VxSortResearch.Utils;
 
-namespace VxSortResearch.PermutationTables
+namespace VxSortResearch.PermutationTables.Int32
 {
     public static unsafe class BytePermTables
     {
@@ -526,7 +526,7 @@ namespace VxSortResearch.PermutationTables
             0x00, 0x11, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, // 0b11111110 (254)|Left-PC: 1
             0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, // 0b11111111 (255)|Left-PC: 0
         };
-        
+
         internal static ReadOnlySpan<byte> BytePermTableWithMinusRightPopCount => new byte[] {
             0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, // 0b00000000 (0)|Right-PC: 0
             0x01, 0xF2, 0x03, 0x04, 0x05, 0x06, 0x07, 0x00, // 0b00000001 (1)|Right-PC: 1
@@ -787,21 +787,20 @@ namespace VxSortResearch.PermutationTables
         };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe Vector256<int> GetBytePermutation(byte * pBase, uint index)
+        internal static Vector256<int> GetBytePermutation(byte * pBase, uint index)
         {
             Debug.Assert(index <= 255);
             Debug.Assert(pBase != null);
             return Avx2.ConvertToVector256Int32(pBase + index * 8);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe Vector256<int> GetBytePermutation(byte * pBase, ulong index)
+        internal static Vector256<int> GetBytePermutation(byte * pBase, ulong index)
         {
             Debug.Assert(index <= 255);
             Debug.Assert(pBase != null);
             return Avx2.ConvertToVector256Int32(pBase + index * 8);
         }
-        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Vector256<int> GetBytePermutationAligned(byte * pBase, uint index)
@@ -813,14 +812,14 @@ namespace VxSortResearch.PermutationTables
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe Vector256<int> GetBytePermutationAligned(byte * pBase, ulong index)
+        internal static Vector256<int> GetBytePermutationAligned(byte * pBase, ulong index)
         {
             Debug.Assert(index <= 255);
             Debug.Assert(pBase != null);
             Debug.Assert(((ulong) (pBase + index * 8)) % 8 == 0);
             return Avx2.ConvertToVector256Int32(pBase + index * 8);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Vector256<int> GetSignedBytePermutationAligned(byte * pBase, uint index)
         {
@@ -831,7 +830,7 @@ namespace VxSortResearch.PermutationTables
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe Vector256<int> GetSignedBytePermutationAligned(byte * pBase, ulong index)
+        internal static Vector256<int> GetSignedBytePermutationAligned(byte * pBase, ulong index)
         {
             Debug.Assert(index <= 255);
             Debug.Assert(pBase != null);
@@ -839,10 +838,10 @@ namespace VxSortResearch.PermutationTables
             return Avx2.ConvertToVector256Int32((sbyte *) (pBase + index * 8));
         }
 
-        internal static readonly unsafe byte* BytePermTablePtr;
-        internal static readonly unsafe byte* BytePermTableAlignedPtr;
-        internal static readonly unsafe byte* BytePermTableWithLeftPopCountAlignedPtr;
-        internal static readonly unsafe byte* BytePermTableWithMinusRightPopCountAlignedPtr;
+        internal static readonly byte* BytePermTablePtr;
+        internal static readonly byte* BytePermTableAlignedPtr;
+        internal static readonly byte* BytePermTableWithLeftPopCountAlignedPtr;
+        internal static readonly byte* BytePermTableWithMinusRightPopCountAlignedPtr;
 
         const uint PAGE_SIZE = 4096U;
 

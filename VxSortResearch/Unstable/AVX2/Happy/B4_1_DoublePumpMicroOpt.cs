@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using LocalsInit;
 using VxSortResearch.PermutationTables;
+using VxSortResearch.PermutationTables.Int32;
 using VxSortResearch.Statistics;
 using VxSortResearch.Utils;
 using static System.Runtime.Intrinsics.X86.Avx;

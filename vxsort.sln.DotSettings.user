@@ -5,11 +5,18 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
   &lt;Assembly Path="/home/dmg/.nuget/packages/newtonsoft.json/12.0.3-beta2/lib/netstandard2.0/Newtonsoft.Json.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b5ac5a53_002D0255_002D4d43_002Dabed_002D2e8f2f534a04/@EntryIndexedValue">&lt;SessionState ContinuousTestingIsOn="False" ContinuousTestingMode="0" FrameworkVersion="{x:Null}" IsLocked="False" Name="DoublePumpAlignedTest" PlatformMonoPreference="{x:Null}" PlatformType="{x:Null}" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=076a666c_002D0f77_002D4c41_002Dbd31_002Da6c84c93e087/@EntryIndexedValue">&lt;SessionState ContinuousTestingIsOn="False" ContinuousTestingMode="0" FrameworkVersion="{x:Null}" IsLocked="False" Name="BasicSort8([2, 1, 4, 3, 6, ...])" PlatformMonoPreference="{x:Null}" PlatformType="{x:Null}" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"&gt;
   &lt;TestAncestor&gt;
-    &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.UnstableParityTests.DoublePumpAlignedTest&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.SillyTest.BasicSort8&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d2d7a21d_002D57ee_002D4cfc_002Db98b_002D7e8651e80ba6/@EntryIndexedValue">&lt;SessionState ContinuousTestingIsOn="False" ContinuousTestingMode="0" FrameworkVersion="{x:Null}" IsLocked="False" Name="Session" PlatformMonoPreference="{x:Null}" PlatformType="{x:Null}" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.BitonicSortTests`1.BasicSort8&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String>
+	
+	
 	
 	
 	

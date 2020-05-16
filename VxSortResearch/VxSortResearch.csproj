@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <None Update="Unstable\SmallSort\BitonicSort.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>BitonicSort.Generated.cs</LastGenOutput>
     </None>
     <None Update="Unstable\SmallSort\GenericBitonicSort.Generated.tt">
@@ -44,6 +44,10 @@
     <None Update="Unstable\SmallSort\T4GeneratedBitonicSort.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>T4GeneratedBitonicSort.Generated.cs</LastGenOutput>
+    </None>
+    <None Update="Unstable\SmallSort\BitonicSortOpt.Generated.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>BitonicSortOpt.Generated.cs</LastGenOutput>
     </None>
   </ItemGroup>
 </Project>

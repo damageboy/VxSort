@@ -3,21 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Intrinsics;
 using NUnit.Framework;
-using VxSortResearch;
-using VxSortResearch.PermutationTables;
+using VxSortResearch.PermutationTables.Int32;
 using static System.Runtime.Intrinsics.Vector128;
 using static System.Runtime.Intrinsics.X86.Avx;
 using static System.Runtime.Intrinsics.X86.Avx2;
 using static System.Runtime.Intrinsics.X86.Bmi2.X64;
 using static System.Runtime.Intrinsics.X86.Popcnt;
-using static VxSortResearch.PermutationTables.BitPermTables;
+using static VxSortResearch.PermutationTables.Int32.BitPermTables;
 using static VxSortResearch.Unstable.AVX2.Sad.DoublePumpOverlinedUnroll8YoDawgBitonicSort.VxSortInt32;
 
 namespace TestBlog
 {
-    public unsafe class PermutationTableTests
+    public unsafe class Int32PermutationTableTests
     {
-        static IEnumerable<int[]> GenerateStableIntPermTableValues_RH()
+        static IEnumerable<int[]> GenerateStableInt32PermTableValues_RH()
         {
             for (var mask = 0U; mask < 256U; mask++) {
                 var data = new[] { -1, -1, -1, -1, -1, -1, -1, -1};
@@ -48,7 +47,7 @@ namespace TestBlog
 
         static IEnumerable<int[]> GenerateStableIntPermTableValues_LH()
         {
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
 
             var newPerms = new int[256][];
 
@@ -68,7 +67,7 @@ namespace TestBlog
         public void GenerateIntArrayAsBytesSourceDrop()
         {
             Console.WriteLine("        internal static ReadOnlySpan<byte> IntPermTable => new byte[] {");
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 fixed (int* p = &perms[i][0]) {
                     var pi = (byte *) p;
@@ -104,7 +103,7 @@ namespace TestBlog
         public void GeneratePackedIntArrayAsBytesSourceDrop()
         {
             Console.WriteLine("        internal static ReadOnlySpan<byte> PackedIntPermTable => new byte[] {");
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             var tmp = stackalloc int[8];
             for (var i = 0U; i < 256U; i += 8) {
                 var packedVector = Vector256<int>.Zero;
@@ -132,7 +131,7 @@ namespace TestBlog
         public void GenerateIntArrayWithPopCountsAsBytesSourceDrop()
         {
             Console.WriteLine("        internal static ReadOnlySpan<byte> IntPermTableWithPopCountSpread => new byte[] {");
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 fixed (int* ip = &perms[i][0]) {
                     var p = (uint*) ip;
@@ -163,7 +162,7 @@ namespace TestBlog
         public void GenerateByteArrayAsBytesSourceDrop()
         {
             Console.WriteLine("        internal static ReadOnlySpan<byte> BytePermTable => new byte[] {");
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 fixed (int* p = &perms[i][0]) {
                     Console.Write("            ");
@@ -174,13 +173,13 @@ namespace TestBlog
             }
             Console.WriteLine("        };");
         }
-        
+
         [Test]
         [Ignore("Run to generate")]
         public void GenerateByteArrayWithLeftPopCountAsBytesSourceDrop()
         {
             Console.WriteLine("        internal static ReadOnlySpan<byte> BytePermTableWithLeftPopCount => new byte[] {");
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 fixed (int* p = &perms[i][0]) {
                     var up = (uint*) p;
@@ -196,13 +195,13 @@ namespace TestBlog
             }
             Console.WriteLine("        };");
         }
-        
+
         [Test]
         //[Ignore("Run to generate")]
         public void GenerateByteArrayWithMinusRightPopCountAsBytesSourceDrop()
         {
             Console.WriteLine("        internal static ReadOnlySpan<byte> BytePermTableWithMinusRightPopCount => new byte[] {");
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 fixed (int* p = &perms[i][0]) {
                     var up = (uint*) p;
@@ -218,7 +217,7 @@ namespace TestBlog
             }
             Console.WriteLine("        };");
         }
-        
+
 
         [Test]
         [Ignore("Run to generate")]
@@ -226,7 +225,7 @@ namespace TestBlog
         {
             Console.WriteLine("        internal static ReadOnlySpan<byte> BitPermTable => new byte[] {");
 
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 var bytePerm = perms[i].Select(e => (byte) e).ToArray();
                 ulong pul;
@@ -251,7 +250,7 @@ namespace TestBlog
         {
             Console.WriteLine("        internal static ReadOnlySpan<byte> BitWithPopCountPermTable => new byte[] {");
 
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 var bytePerm = perms[i].Select(e => (byte) e).ToArray();
                 ulong pul;
@@ -286,7 +285,7 @@ namespace TestBlog
         {
             Console.WriteLine("        internal static ReadOnlySpan<byte> BitWithInterleavedPopCountPermTable => new byte[] {");
 
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 var b = perms[i].Select(e => (byte) e).ToArray();
 
@@ -350,7 +349,7 @@ namespace TestBlog
         [Repeat(1000)]
         public void GeneratedPermutationsAreCorrect()
         {
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
 
             for (var i = 0U; i < 256U; i++) {
                 var pivot = 666;
@@ -385,7 +384,7 @@ namespace TestBlog
         [Test]
         public void GeneratedPermutationsAreStable()
         {
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
 
             for (var mask = 0U; mask < 256U; mask++) {
                 var pivot = 666;
@@ -427,7 +426,7 @@ namespace TestBlog
         [Test]
         public void CompiledIntPermTablePtrIsGood()
         {
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 fixed (int* p = &perms[i][0]) {
                     var truth = LoadDquVector256(p);
@@ -481,7 +480,7 @@ namespace TestBlog
         [Test]
         public void CompiledIntPermTableAlignedPtrIsGood()
         {
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 fixed (int* p = &perms[i][0]) {
                     var truth = LoadDquVector256(p);
@@ -494,7 +493,7 @@ namespace TestBlog
         [Test]
         public void CompiledBytePermTablePtrIsGood()
         {
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 fixed (int* p = &perms[i][0]) {
                     var truth = LoadDquVector256(p);
@@ -507,7 +506,7 @@ namespace TestBlog
         [Test]
         public void CompiledBytePermTableAlignedPtrIsGood()
         {
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 fixed (int* p = &perms[i][0]) {
                     var truth = LoadDquVector256(p);
@@ -516,11 +515,11 @@ namespace TestBlog
                 }
             }
         }
-        
+
         [Test]
         public void CompiledBytePermTableWithLeftPopCountAlignedPtrIsGood()
         {
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 fixed (int* p = &perms[i][0]) {
                     var truth = LoadDquVector256(p);
@@ -533,11 +532,11 @@ namespace TestBlog
                 }
             }
         }
-        
+
         [Test]
         public void CompiledBytePermTableWithMinusRightPopCountAlignedPtrIsGood()
         {
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 fixed (int* p = &perms[i][0]) {
                     var truth = LoadDquVector256(p);
@@ -549,13 +548,13 @@ namespace TestBlog
                     Assert.That(leftPopCount, Is.EqualTo(expectedLeftPopCount));
                 }
             }
-        }        
-        
+        }
+
 
         [Test]
         public void CompiledIntPermTableWithSpreadPopCountPtrIsGood()
         {
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 fixed (int* p = &perms[i][0]) {
                     var truth = LoadDquVector256(p);
@@ -575,7 +574,7 @@ namespace TestBlog
         [Test]
         public void CompiledBitPermTablePtrIsGood()
         {
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             for (var i = 0U; i < 256U; i++) {
                 fixed (int* p = &perms[i][0]) {
                     var truth = LoadDquVector256(p);
@@ -640,7 +639,7 @@ namespace TestBlog
         [Test]
         public void CompiledBitWithInterleavedPopCountPermTablePtrIsGood()
         {
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             var shuffler = LoadDquVector256(TransposeShufflerPtr);
 
             // We read everything in groups of 8 in this test
@@ -683,7 +682,7 @@ namespace TestBlog
         [Test]
         public void CompiledBitWithInterleavedPopCountPermTablePtrIsGoodRandomized()
         {
-            var perms = GenerateStableIntPermTableValues_RH().ToArray();
+            var perms = GenerateStableInt32PermTableValues_RH().ToArray();
             var shuffler = LoadDquVector256(TransposeShufflerPtr);
             var pBase = BitWithInterleavedPopCountPermTablePtr;
 

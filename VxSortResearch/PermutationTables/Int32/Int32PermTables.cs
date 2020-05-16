@@ -5,7 +5,7 @@ using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using VxSortResearch.Utils;
 
-namespace VxSortResearch.PermutationTables
+namespace VxSortResearch.PermutationTables.Int32
 {
     public unsafe static class Int32PermTables
     {

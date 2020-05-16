@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using NUnit.Framework;
 using VxSortResearch.Unstable.SmallSort;
@@ -56,6 +57,33 @@ namespace TestBlog
 
             Assert.That(randomData, Is.Ordered,             reproContext);
             Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
+        }
+    }
+
+    public class SillyTest
+    {
+        [Test]
+        [TestCase(new[] { 2, 1, 4, 3, 6, 5, 8, 7 })]
+        public unsafe void BasicSort8(int[] data)
+        {
+            var v = Vector256.Create(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
+            var sorted = new int[8];
+
+            var v1 = v;
+            BitonicSort<int>.BitonicSort01V(ref v1);
+
+            fixed (int *pInt = sorted)
+                Avx.Store(pInt, v1);
+
+            Assert.That(sorted, Is.Ordered.Ascending);
+
+            var v2 = v;
+            BitonicSort<int>.BitonicSort01VReversed(ref v2);
+
+            fixed (int *pInt = sorted)
+                Avx.Store(pInt, v2);
+
+            Assert.That(sorted, Is.Ordered.Descending);
         }
     }
 }

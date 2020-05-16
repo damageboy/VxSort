@@ -2,10 +2,11 @@ using System;
 using System.Diagnostics;
 using System.Runtime.Intrinsics;
 using VxSortResearch.PermutationTables;
+using VxSortResearch.PermutationTables.Int32;
 using static System.Runtime.Intrinsics.X86.Avx;
 using static System.Runtime.Intrinsics.X86.Avx2;
 using static System.Runtime.Intrinsics.X86.Popcnt;
-using static VxSortResearch.PermutationTables.BitPermTables;
+using static VxSortResearch.PermutationTables.Int32.BitPermTables;
 
 namespace VxSortResearch.Stable.AVX2
 {

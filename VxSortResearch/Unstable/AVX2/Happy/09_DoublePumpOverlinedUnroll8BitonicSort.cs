@@ -11,7 +11,7 @@ using static System.Runtime.Intrinsics.X86.Avx;
 using static System.Runtime.Intrinsics.X86.Avx2;
 using static System.Runtime.Intrinsics.X86.Popcnt.X64;
 using static System.Runtime.Intrinsics.X86.Popcnt;
-using static VxSortResearch.PermutationTables.BytePermTables;
+using static VxSortResearch.PermutationTables.Int32.BytePermTables;
 
 namespace VxSortResearch.Unstable.AVX2.Happy
 {

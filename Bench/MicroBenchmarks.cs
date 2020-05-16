@@ -11,6 +11,7 @@ using BenchmarkDotNet.Reports;
 using Perfolizer.Horology;
 using VxSortResearch;
 using VxSortResearch.PermutationTables;
+using VxSortResearch.PermutationTables.Int32;
 using static System.Runtime.Intrinsics.X86.Avx;
 using static System.Runtime.Intrinsics.X86.Avx2;
 using static System.Runtime.Intrinsics.Vector128;

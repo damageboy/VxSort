@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using VxSortResearch.PermutationTables;
+using VxSortResearch.PermutationTables.Int32;
 using VxSortResearch.Statistics;
 using VxSortResearch.Unstable.SmallSort;
 using VxSortResearch.Utils;
@@ -16,8 +17,8 @@ using static System.Runtime.Intrinsics.X86.Bmi2;
 using static System.Runtime.Intrinsics.X86.Bmi2.X64;
 using static System.Runtime.Intrinsics.X86.Sse2;
 using static System.Runtime.Intrinsics.X86.Sse41;
-using static VxSortResearch.PermutationTables.BitPermTables;
-using static VxSortResearch.PermutationTables.Int32PermTables;
+using static VxSortResearch.PermutationTables.Int32.BitPermTables;
+using static VxSortResearch.PermutationTables.Int32.Int32PermTables;
 
 namespace VxSortResearch.Unstable.AVX2.Sad
 {

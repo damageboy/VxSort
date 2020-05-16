@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
-namespace VxSortResearch.PermutationTables
+namespace VxSortResearch.PermutationTables.Int32
 {
     public static class BitPermTables
     {
@@ -795,7 +795,7 @@ namespace VxSortResearch.PermutationTables
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe Vector256<int> UnpackBitPermutation(in uint packedPerm)
+        internal static Vector256<int> UnpackBitPermutation(in uint packedPerm)
         {
             const ulong magicMask = 0b00000111_00000111_00000111_00000111_00000111_00000111_00000111_00000111;
             return Avx2.ConvertToVector256Int32(Vector128
@@ -803,7 +803,7 @@ namespace VxSortResearch.PermutationTables
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe Vector256<int> UnpackBitPermutation(in ulong packedPerm)
+        internal static Vector256<int> UnpackBitPermutation(in ulong packedPerm)
         {
             const ulong magicMask = 0b00000111_00000111_00000111_00000111_00000111_00000111_00000111_00000111;
             return Avx2.ConvertToVector256Int32(Vector128

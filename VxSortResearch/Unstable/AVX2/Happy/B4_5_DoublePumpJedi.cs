@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using LocalsInit;
 using VxSortResearch.PermutationTables;
+using VxSortResearch.PermutationTables.Int32;
 using VxSortResearch.Statistics;
 using VxSortResearch.Utils;
 using static System.Runtime.Intrinsics.X86.Avx;
@@ -27,6 +28,13 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                     var sorter = new VxSortInt32(startPtr: pInt, endPtr: pInt + array.Length - 1);
                     var depthLimit = 2 * FloorLog2PlusOne(array.Length);
                     sorter.Sort(pInt, pInt + array.Length - 1, depthLimit);
+                }
+
+                if (typeof(T) == typeof(long)) {
+                    var pLong = (long*) p;
+                    var sorter = new VxSortInt64(startPtr: pLong, endPtr: pLong + array.Length - 1);
+                    var depthLimit = 2 * FloorLog2PlusOne(array.Length);
+                    sorter.Sort(pLong, pLong + array.Length - 1, depthLimit);
                 }
             }
         }
@@ -365,5 +373,249 @@ namespace VxSortResearch.Unstable.AVX2.Happy
             void Trace(string d) => Console.WriteLine($"{_depth}> {d}");
 
         }
+
+        internal unsafe ref struct VxSortInt64
+        {
+            const int SLACK_PER_SIDE_IN_ELEMENTS = SLACK_PER_SIDE_IN_VECTORS * 4;
+            const int SMALL_SORT_THRESHOLD_ELEMENTS = 40;
+            const int TMP_SIZE_IN_ELEMENTS = 2 * SLACK_PER_SIDE_IN_ELEMENTS + 4;
+
+            readonly long* _startPtr,  _endPtr,
+                          _tempStart, _tempEnd;
+#pragma warning disable 649
+            fixed long _temp[TMP_SIZE_IN_ELEMENTS];
+            int _depth;
+#pragma warning restore 649
+            internal long Length => _endPtr - _startPtr + 1;
+
+            public VxSortInt64(long* startPtr, long* endPtr) : this()
+            {
+                Debug.Assert(SMALL_SORT_THRESHOLD_ELEMENTS >= TMP_SIZE_IN_ELEMENTS);
+                _depth = 0;
+                _startPtr = startPtr;
+                _endPtr   = endPtr;
+                fixed (long* pTemp = _temp) {
+                    _tempStart = pTemp;
+                    _tempEnd   = pTemp + TMP_SIZE_IN_ELEMENTS;
+                }
+            }
+
+            internal void Sort(long* left, long* right, int depthLimit)
+            {
+                Debug.Assert(left <= right);
+
+                var length = (int) (right - left + 1);
+
+                long* mid;
+                switch (length) {
+                    case 0:
+                    case 1:
+                        return;
+                    case 2:
+                        SwapIfGreater(left, right);
+                        return;
+                    case 3:
+                        mid = right - 1;
+                        SwapIfGreater(left, mid);
+                        SwapIfGreater(left, right);
+                        SwapIfGreater(mid,  right);
+                        return;
+                }
+
+                // Go to insertion sort below this threshold
+                if (length <= SMALL_SORT_THRESHOLD_ELEMENTS) {
+                    Dbg($"Going for Insertion Sort on [{left - _startPtr} -> {right - _startPtr - 1}]");
+                    InsertionSort(left, right);
+                    return;
+                }
+
+                // Detect a whole bunch of bad cases where partitioning
+                // will not do well:
+                // 1. Reverse sorted array
+                // 2. High degree of repeated values (dutch flag problem, one value)
+                if (depthLimit == 0)
+                {
+                    HeapSort(new Span<long>(left, (int) (right - left + 1)));
+                    _depth--;
+                    return;
+                }
+                depthLimit--;
+
+                // Compute median-of-three, of:
+                // the first, mid and one before last elements
+                mid = left + ((right - left) / 2);
+                SwapIfGreater(left, mid);
+                SwapIfGreater(left, right - 1);
+                SwapIfGreater(mid,  right - 1);
+
+                // Pivot is mid, place it in the right hand side
+                Dbg($"Pivot is {*mid}, storing in [{right - left}]");
+                Swap(mid, right);
+
+                var sep = VectorizedPartitionInPlace(left, right);
+
+                Stats.BumpDepth(1);
+                _depth++;
+                Sort(left, sep - 1, depthLimit);
+                Sort(sep,  right, depthLimit);
+                Stats.BumpDepth(-1);
+                _depth--;
+            }
+
+            /// <summary>
+            /// Partition using Vectorized AVX2 intrinsics
+            /// </summary>
+            /// <param name="left">pointer (inclusive) to the first element to partition</param>
+            /// <param name="right">pointer (exclusive) to the last element to partition, actually points to where the pivot before partitioning</param>
+            /// <returns>Position of the pivot that was passed to the function inside the array</returns>
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+            long* VectorizedPartitionInPlace(long* left, long* right)
+            {
+                Stats.BumpPartitionOperations();
+                Debug.Assert(right - left >= SLACK_PER_SIDE_IN_ELEMENTS * 2);
+                Dbg($"{nameof(VectorizedPartitionInPlace)}: [{left - _startPtr}-{right - _startPtr}]({right - left + 1})");
+                var N = Vector256<long>.Count; // treated as constant by the JIT
+                var pivot = *right;
+
+                var tmpLeft = _tempStart;
+                var tmpRight = _tempEnd - N;
+
+                var pBase = BytePermTables.BytePermTableAlignedPtr;
+                var P = Vector256.Create(pivot);
+                Trace($"pivot Vector256 is: {P}");
+
+                Stats.BumpVectorizedPartitionBlocks(2);
+                PartitionBlock(left         , P, pBase, ref tmpLeft, ref tmpRight);
+                PartitionBlock(right - N - 1, P, pBase, ref tmpLeft, ref tmpRight);
+
+                var writeLeft = left;
+                var writeRight = right - N - 1;
+                var readLeft = left + N;
+                var readRight = right - 2*N - 1;
+
+                while (readRight >= readLeft) {
+                    Stats.BumpScalarCompares();
+                    Stats.BumpVectorizedPartitionBlocks();
+
+                    long* nextPtr;
+                    if ((byte *) writeRight - (byte *) readRight < N * sizeof(int)) {
+                        nextPtr   =  readRight;
+                        readRight -= N;
+                    } else {
+                        nextPtr  =  readLeft;
+                        readLeft += N;
+                    }
+
+                    PartitionBlock(nextPtr, P, pBase, ref writeLeft, ref writeRight);
+                }
+
+                // We're scalar from now, so adjust required right-side pointers
+                readRight += N;
+                tmpRight += N;
+
+                Trace($"Doing remainder as scalar partition on [{readLeft - left}-{readRight - left})({readRight - readLeft}) into tmp  [{tmpLeft - _tempStart}-{tmpRight - 1 - _tempStart}]");
+                while (readLeft < readRight) {
+                    Stats.BumpScalarCompares();
+                    var v = *readLeft++;
+
+                    if (v <= pivot) {
+                        Trace($"Read: [{readLeft - 1 - left}]={v} <= {pivot} -> writing to tmpLeft [{tmpLeft - _tempStart}]");
+                        *tmpLeft++ = v;
+                    }
+                    else {
+                        Trace($"Read: [{readLeft - 1 - left}]={v} > {pivot} -> writing to tmpRight [{tmpRight - 1 - _tempStart}]");
+                        *--tmpRight = v;
+                    }
+
+                    Trace($"RL:{readLeft - left} 🡄🡆 RR:{readRight - left}");
+                }
+
+                var leftTmpSize = (uint) (int)(tmpLeft - _tempStart);
+                Trace($"Copying back tmpLeft -> [{writeLeft - left}-{writeLeft - left + leftTmpSize})");
+                Unsafe.CopyBlockUnaligned(writeLeft, _tempStart, leftTmpSize*sizeof(int));
+                writeLeft += leftTmpSize;
+                var rightTmpSize = (uint) (int) (_tempEnd - tmpRight);
+                Trace($"Copying back tmpRight -> [{writeLeft - left}-{writeLeft - left + rightTmpSize})");
+                Unsafe.CopyBlockUnaligned(writeLeft, tmpRight, rightTmpSize*sizeof(int));
+
+                // Shove to pivot back to the boundary
+                Dbg($"Swapping pivot {*right} from [{right - left}] into [{writeLeft - left}]");
+                Swap(writeLeft++, right);
+                Dbg($"Final Boundary: {writeLeft - left}/{right - left + 1}");
+                Dbg(new ReadOnlySpan<int>(_startPtr, (int) Length).Dump());
+
+                VerifyBoundaryIsCorrect(left, right, pivot, writeLeft);
+
+                return writeLeft;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining|MethodImplOptions.AggressiveOptimization)]
+#if !DEBUG
+            static
+#endif
+            void PartitionBlock(long *dataPtr, Vector256<long> P, byte* pBase, ref long* writeLeft, ref long* writeRight)
+            {
+#if DEBUG
+                var that = this;
+#endif
+
+                var dataVec = LoadDquVector256(dataPtr);
+                var mask = (ulong) (uint) MoveMask(CompareGreaterThan(dataVec, P).AsDouble());
+                // Since there is no permutevar4x64, we have to fake it with 32-bit permutation entries
+                dataVec = PermuteVar8x32(
+                    dataVec.AsInt32(),
+                    BytePermTables.GetBytePermutationAligned(pBase, mask)).AsInt64();
+                Store(writeLeft,  dataVec);
+                Store(writeRight, dataVec);
+                var popCount = -(long) PopCount(mask);
+                writeRight += popCount;
+                writeLeft  += popCount + 8;
+
+#if DEBUG
+                Vector256<int> LoadDquVector256(int* address)
+                {
+                    //Debug.Assert(address >= left);
+                    //Debug.Assert(address + 8U <= right);
+                    var tmp = Avx.LoadDquVector256(address);
+                    //Trace($"Reading from offset: [{address - left}-{address - left + 7U}]: {tmp}");
+                    return tmp;
+                }
+
+                void Store(int* address, Vector256<int> boundaryData)
+                {
+                    //Debug.Assert(address >= left);
+                    //Debug.Assert(address + 8U <= right);
+                    //Debug.Assert((address >= writeLeft && address + 8U <= readLeft) ||
+                    //             (address >= readRight && address <= writeRight));
+                    //Trace($"Storing to [{address - left}-{address - left + 7U}]");
+                    Avx.Store(address, boundaryData);
+                }
+#endif
+            }
+
+            [Conditional("DEBUG")]
+            void VerifyBoundaryIsCorrect(long* left, long* right, long pivot, long* boundary)
+            {
+                for (var t = left; t < boundary; t++)
+                    if (!(*t <= pivot)) {
+                        Dbg($"depth={_depth} boundary={boundary - left}, idx = {t - left} *t({*t}) <= pivot={pivot}");
+                        Debug.Assert(*t <= pivot, $"depth={_depth} boundary={boundary - left}, idx = {t - left} *t({*t}) <= pivot={pivot}");
+                    }
+
+                for (var t = boundary; t <= right; t++)
+                    if (!(*t >= pivot)) {
+                        Dbg($"depth={_depth} boundary={boundary - left}, idx = {t - left} *t({*t}) >= pivot={pivot}");
+                        Debug.Assert(*t >= pivot, $"depth={_depth} boundary={boundary - left}, idx = {t - left} *t({*t}) >= pivot={pivot}");
+                    }
+            }
+
+            [Conditional("DEBUG")]
+            void Dbg(string d) => Console.WriteLine($"{_depth}> {d}");
+
+            [Conditional("DEBUG")]
+            void Trace(string d) => Console.WriteLine($"{_depth}> {d}");
+
+        }
+
     }
 }
