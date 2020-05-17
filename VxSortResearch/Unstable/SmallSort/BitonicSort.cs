@@ -9,7 +9,7 @@ namespace VxSortResearch.Unstable.SmallSort
 {
     using V = Vector256<int>;
 
-    internal static partial class BitonicSort<T> where T : unmanaged
+    public static partial class BitonicSort<T> where T : unmanaged
     {
         // Legend:
         // X - shuffle/permute mask for generating a cross (X) shuffle

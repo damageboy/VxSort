@@ -41,12 +41,12 @@ namespace Bench
             AddJob(Job.MediumRun);
             AddColumn(new TimePerNColumn());
             AddColumn(SpeedupRatioColumn.SpeedupOfMedian);
-            AddExporter(new DatatableJsonExporter());
-            AddDiagnoser(
-                new DisassemblyDiagnoser(
-                    new DisassemblyDiagnoserConfig(
-                        maxDepth: 4, // you can change it to a bigger value if you want to get more framework methods disassembled
-                        exportGithubMarkdown: true)));
+            //AddExporter(new DatatableJsonExporter());
+            // AddDiagnoser(
+            //     new DisassemblyDiagnoser(
+            //         new DisassemblyDiagnoserConfig(
+            //             maxDepth: 4, // you can change it to a bigger value if you want to get more framework methods disassembled
+            //             exportGithubMarkdown: true)));
         }
     }
 
@@ -193,7 +193,6 @@ namespace Bench
         [Benchmark]
         public void Jedi() => DoublePumpJedi.Sort(_arrays[_iterationIndex++]);
     }
-
     
     [GenericTypeArguments(typeof(int))] // value type
     [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
@@ -201,7 +200,7 @@ namespace Bench
     public class BlogPt5_1<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
         [Benchmark(Baseline=true)]
-        public void MicroOpt() => DoublePumpMicroOpt.Sort(_arrays[_iterationIndex++]);
+        public void Jedi() => DoublePumpJedi.Sort(_arrays[_iterationIndex++]);
 
         [Benchmark]
         public void Aligned() => DoublePumpAligned.Sort(_arrays[_iterationIndex++]);
@@ -213,16 +212,10 @@ namespace Bench
     public class BlogPt5_2<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
         [Benchmark(Baseline =true)]
-        public void MicroOpt() => DoublePumpMicroOpt.Sort(_arrays[_iterationIndex++]);
+        public void Jedi() => DoublePumpJedi.Sort(_arrays[_iterationIndex++]);
 
         [Benchmark]
         public void Overlined() => DoublePumpOverlined.Sort(_arrays[_iterationIndex++]);
-
-        [Benchmark]
-        public void SimplerBranch() => DoublePumpOverlinedSimplerBranch.Sort(_arrays[_iterationIndex++]);
-
-        [Benchmark]
-        public void SimplerBranchless() => DoublePumpOverlinedBranchless.Sort(_arrays[_iterationIndex++]);
     }
 
     [GenericTypeArguments(typeof(int))] // value type
@@ -253,7 +246,7 @@ namespace Bench
     [GenericTypeArguments(typeof(int))] // value type
     [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
     [Config(typeof(SelectedConfig))]
-    public class BlogPt5<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
+    public class BlogPt7<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
         [Benchmark(Baseline=true)]
         public void ArraySort() => Array.Sort(_arrays[_iterationIndex++]);
@@ -271,40 +264,29 @@ namespace Bench
         public void Unrolled8BitonicSort() => DoublePumpOverlinedUnroll8BitonicSort.Sort(_arrays[_iterationIndex++]);
         
         //[Benchmark]
-        public void PackedUnrolled8BitonicSort() => DoublePumpOverlinedPackedUnroll8BitonicSort.Sort(_arrays[_iterationIndex++]);
+        //public void PackedUnrolled8BitonicSort() => DoublePumpOverlinedPackedUnroll8BitonicSort.Sort(_arrays[_iterationIndex++]);
         
     }
 
     [GenericTypeArguments(typeof(int))] // value type
     [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
     [Config(typeof(SelectedConfig))]
-    public class BlogPt7<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
+    public class BlogPt9<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
-        //[Benchmark(Baseline =true)]
+        [Benchmark(Baseline =true)]
         public void ArraySort() => Array.Sort(_arrays[_iterationIndex++]);
 
-
-        [Benchmark(Baseline=true)]
+        //[Benchmark(Baseline=true)]
+        [Benchmark]
         public void Unrolled8BitonicSort() => DoublePumpOverlinedUnroll8BitonicSort.Sort(_arrays[_iterationIndex++]);
 
 
-        [Benchmark]
+        //[Benchmark]
         public void Unrolled8YoDawgBitonicSort() => DoublePumpOverlinedUnroll8YoDawgBitonicSort.Sort(_arrays[_iterationIndex++]);
 
-        [Benchmark]
+        //[Benchmark]
         public void Unrolled8HalfDawgBitonicSort() => DoublePumpOverlinedUnroll8HalfDawgBitonicSort.Sort(_arrays[_iterationIndex++]);
 
     }
 
-    [GenericTypeArguments(typeof(int))] // value type
-    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
-    [Config(typeof(SelectedConfig))]
-    public class CrapCrap<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
-    {
-        [Benchmark(Baseline = true)]
-        public void AlignedOverlap() => DoublePumpOverlined.Sort(_arrays[_iterationIndex++]);
-
-        [Benchmark]
-        public void AlignedOverlapBranchless() => DoublePumpOverlinedBranchless.Sort(_arrays[_iterationIndex++]);
-    }
 }

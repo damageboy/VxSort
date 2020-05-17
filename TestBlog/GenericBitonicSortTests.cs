@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
@@ -24,12 +25,24 @@ namespace TestBlog
     {
         static IEnumerable<int> BitonicSizes => Enumerable.Range(1, 16).Select(x => x * Vector256<T>.Count);
 
-        static IEnumerable<TestCaseData> ConstantSeedTests =>
+        static IEnumerable<TestCaseData> ConstantSeed =>
             from size in BitonicSizes
             from seed in new[] {666, 333, 999, 314159}
             select new GSortTestCaseData<T>(new SortTestGenerator<T>(() => DataGeneration.GenerateData<T>(size, seed))).SetArgDisplayNames($"{typeof(T)}/{size:000}/{seed}");
 
-        [TestCaseSource(nameof(ConstantSeedTests))]
+        static IEnumerable<TestCaseData> TimeSeed =>
+            from size in BitonicSizes
+            let numIterations = int.Parse(Environment.GetEnvironmentVariable("NUM_CYCLES") ?? "100", CultureInfo.InvariantCulture)
+            from i in Enumerable.Range(0, numIterations)
+            let seed = ((int) DateTime.Now.Ticks + i * 666) % int.MaxValue
+            select new GSortTestCaseData<T>(new SortTestGenerator<T>(() => DataGeneration.GenerateData<T>(size, seed))).SetArgDisplayNames($"{typeof(T)}/{size:000}/R{i}");
+        
+        static IEnumerable<TestCaseData> AllTests =>
+            ConstantSeed.Concat(TimeSeed);
+            //PreSorted.Concat(HalfMinValue).Concat(HalfMaxValue).Concat(ConstantSeed).Concat(TimeSeed);
+
+        
+        [TestCaseSource(nameof(AllTests))]
         public unsafe void GenericBitonicSortTest(SortTestGenerator<T> dg)
         {
             var (randomData, sortedData, reproContext) = dg.Generator();
@@ -42,7 +55,7 @@ namespace TestBlog
             Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
         }
 
-        [TestCaseSource(nameof(ConstantSeedTests))]
+        [TestCaseSource(nameof(AllTests))]
         public unsafe void T4GeneratedBitonicSortTest(SortTestGenerator<T> dg)
         {
             var (randomData, sortedData, reproContext) = dg.Generator();
@@ -54,8 +67,25 @@ namespace TestBlog
             Assert.That(randomData, Is.Ordered,             reproContext);
             Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
         }
+        
 
-        [Test]
+        [TestCaseSource(nameof(AllTests))]
+        public unsafe void T4GeneratedBitonicSortOptTest(SortTestGenerator<T> dg)
+        {
+            var (randomData, sortedData, reproContext) = dg.Generator();
+
+            fixed (T* p = &randomData[0]) {
+                T4GeneratedBitonicSortOpt<T>.Sort(p, randomData.Length);
+            }
+
+            Assert.That(randomData, Is.Ordered,             reproContext);
+            Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
+        }
+    }
+
+    public class BasicBitonicOpsTests
+    {
+                [Test]
         [TestCase(new[] { 100L, 101L, 100L, 101L }, new[] { 100L, 101L, 100L, 101L })]
         [TestCase(new[] { 100L, 101L, 100L, 101L }, new[] { 1L, 1L, 1L, 1L })]
         [TestCase(new[] { 1L, 1L, 1L, 1L }, new[] { 100L, 101L, 100L, 101L })]

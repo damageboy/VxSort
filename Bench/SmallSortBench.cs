@@ -25,7 +25,7 @@ namespace Bench
             AddDiagnoser(
                 new DisassemblyDiagnoser(
                     new DisassemblyDiagnoserConfig(
-                        maxDepth: 2, // you can change it to a bigger value if you want to get more framework methods disassembled
+                        maxDepth: 4, // you can change it to a bigger value if you want to get more framework methods disassembled
                         exportGithubMarkdown: true)));
         }
     }
@@ -77,7 +77,7 @@ namespace Bench
     [GenericTypeArguments(typeof(int))]   // value type
     [InvocationCount(InvocationsPerIterationValue)]
     [Config(typeof(SmallSortConfig))]
-    public class SmallSortBench<T> : SmallSortBenchBase<T> where T : unmanaged, IComparable<T>
+    public class Int32OnlySmallSortBench<T> : SmallSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
         const int InvocationsPerIterationValue = 4096;
         protected override int InvocationsPerIteration => InvocationsPerIterationValue;
@@ -93,6 +93,10 @@ namespace Bench
 
         [Benchmark]
         public unsafe void BitonicSort() => BitonicSort<T>.Sort((int *) _arrayPtrs[_iterationIndex++], N);
+        
+        [Benchmark]
+        public unsafe void BitonicSortOpt() => BitonicSortOpt<T>.Sort((int *) _arrayPtrs[_iterationIndex++], N);
+        
     }
 
     [GenericTypeArguments(typeof(int))] // value type
@@ -120,9 +124,11 @@ namespace Bench
         //[Benchmark]
         public unsafe void GenericBitonicSort() => GenericBitonicSort<T>.Sort(_arrayPtrs[_iterationIndex++], N);
 
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public unsafe void T4GeneratedBitonicSort() => T4GeneratedBitonicSort<T>.Sort(_arrayPtrs[_iterationIndex++], N);
 
+        [Benchmark]
+        public unsafe void T4GeneratedBitonicSortOpt() => T4GeneratedBitonicSortOpt<T>.Sort(_arrayPtrs[_iterationIndex++], N);
 
     }
 }

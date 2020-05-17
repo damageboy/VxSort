@@ -68,7 +68,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
         }
 
         const int SLACK_PER_SIDE_IN_VECTORS = 1;
-        const int SMALL_SORT_THRESHOLD_ELEMENTS = 32;
+        const int SMALL_SORT_THRESHOLD_ELEMENTS = 40;
         const ulong ALIGN = 32;
         const ulong ALIGN_MASK = ALIGN - 1;
 

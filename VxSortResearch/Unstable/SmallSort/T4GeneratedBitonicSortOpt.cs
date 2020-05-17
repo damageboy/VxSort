@@ -1,6 +1,6 @@
 namespace VxSortResearch.Unstable.SmallSort
 {
-    internal static partial class T4GeneratedBitonicSort<T> where T : unmanaged
+    internal static partial class T4GeneratedBitonicSortOpt<T> where T : unmanaged
     {
 
         // Legend:

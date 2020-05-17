@@ -21,7 +21,7 @@ using static System.Runtime.Intrinsics.X86.Avx2;
 
 namespace VxSortResearch.Unstable.SmallSort
 {
-    static unsafe partial class T4GeneratedBitonicSort<T>
+    static unsafe partial class T4GeneratedBitonicSortOpt<T>
     {
 <#
     static uint GetNextPowerOf2(uint v)
@@ -132,7 +132,7 @@ namespace VxSortResearch.Unstable.SmallSort
 <#  foreach (var type in BitonicTypes) {
         string MaybeCmp() => (type == "long" || type == "ulong") ? ", cmp" : ""; #>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        static void BitonicSort01V(<#= GenerateParamDefList(1, type) #>)
+        static void BitonicSort01VAscending(<#= GenerateParamDefList(1, type) #>)
         {
             // ReSharper disable JoinDeclarationAndInitializer
             Vector256<<#= type #>> min, max, s<#= MaybeCmp() #>;
@@ -179,7 +179,53 @@ namespace VxSortResearch.Unstable.SmallSort
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        static void BitonicSort01VMerge(<#= GenerateParamDefList(1, type) #>)
+        static void BitonicSort01VDescending(<#= GenerateParamDefList(1, type) #>)
+        {
+            // ReSharper disable JoinDeclarationAndInitializer
+            Vector256<<#= type #>> min, max, s<#= MaybeCmp() #>;
+            // ReSharper restore JoinDeclarationAndInitializer
+
+<#      if (type == "ulong") { #>
+            var topBit = Vector256.Create(0x8000000000000000UL).AsInt64();
+<#      } #>
+            s   = <#= GenerateShuffleX1("d01", type) #>;
+            <#= CrappityCrapCrap("s", "d01", type)#>
+            min = <#= GenerateMin("s", "d01", type) #>;
+            max = <#= GenerateMax("s", "d01", type) #>;
+            d01 = <#= GenerateBlendB1("max", "min", type) #>;
+
+            s   = <#= GenerateShuffleXR("d01", type) #>;
+            <#= CrappityCrapCrap("s", "d01", type)#>
+            min = <#= GenerateMin("s", "d01", type) #>;
+            max = <#= GenerateMax("s", "d01", type) #>;
+            d01 = <#= GenerateBlendB2("max", "min", type) #>;
+
+            s   = <#= GenerateShuffleX1("d01", type) #>;
+            <#= CrappityCrapCrap("s", "d01", type)#>
+            min = <#= GenerateMin("s", "d01", type) #>;
+            max = <#= GenerateMax("s", "d01", type) #>;
+            d01 = <#= GenerateBlendB1("max", "min",  type) #>;
+
+<#          if (BitonicSizeMap[type] == 4) { #>
+            s   = <#= GenerateReverse("d01", type) #>;
+            min = <#= GenerateMin("s", "d01", type) #>;
+            max = <#= GenerateMax("s", "d01", type) #>;
+            d01 = <#= GenerateBlendB4("max", "min", type) #>;
+
+            s   = <#= GenerateShuffleX2("d01", type) #>;
+            min = <#= GenerateMin("s", "d01", type) #>;
+            max = <#= GenerateMax("s", "d01", type) #>;
+            d01 = <#= GenerateBlendB2("max", "min", type) #>;
+
+            s   = <#= GenerateShuffleX1("d01", type) #>;
+            min = <#= GenerateMin("s", "d01", type) #>;
+            max = <#= GenerateMax("s", "d01", type) #>;
+            d01 = <#= GenerateBlendB1("max", "min", type) #>;
+<#          } #>
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        static void BitonicSort01VMergeAscending(<#= GenerateParamDefList(1, type) #>)
         {
             // ReSharper disable JoinDeclarationAndInitializer
             Vector256<<#= type #>> min, max, s<#= MaybeCmp() #>;
@@ -207,6 +253,36 @@ namespace VxSortResearch.Unstable.SmallSort
             max = <#= GenerateMax("s", "d01", type) #>;
             d01 = <#= GenerateBlendB1("min", "max", type) #>;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        static void BitonicSort01VMergeDescending(<#= GenerateParamDefList(1, type) #>)
+        {
+            // ReSharper disable JoinDeclarationAndInitializer
+            Vector256<<#= type #>> min, max, s<#= MaybeCmp() #>;
+            // ReSharper restore JoinDeclarationAndInitializer
+
+<#      if (type == "ulong") { #>
+            var topBit = Vector256.Create(0x8000000000000000UL).AsInt64();
+<#      } #>
+
+<#          if (BitonicSizeMap[type] == 4) { #>
+            s   = <#= GenerateCross("d01", type) #>;
+            min = <#= GenerateMin("s", "d01", type) #>;
+            max = <#= GenerateMax("s", "d01", type) #>;
+            d01 = <#= GenerateBlendB4("max", "min", type) #>;
+<#          } #>
+            s   = <#= GenerateShuffleX2("d01", type) #>;
+            <#= CrappityCrapCrap("s", "d01", type)#>
+            min = <#= GenerateMin("s", "d01", type) #>;
+            max = <#= GenerateMax("s", "d01", type) #>;
+            d01 = <#= GenerateBlendB2("max", "min", type) #>;
+
+            s   = <#= GenerateShuffleX1("d01", type) #>;
+            <#= CrappityCrapCrap("s", "d01", type)#>
+            min = <#= GenerateMin("s", "d01", type) #>;
+            max = <#= GenerateMax("s", "d01", type) #>;
+            d01 = <#= GenerateBlendB1("max", "min", type) #>;
+        }
 <#  } #>
 
 <#
@@ -216,7 +292,31 @@ namespace VxSortResearch.Unstable.SmallSort
             var s2 = m - s1;
             string MaybeCmp() => (type == "long" || type == "ulong") ? ", cmp" : ""; #>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        static void BitonicSort<#= $"{m:00}" #>V(<#= GenerateParamDefList(m, type) #>)
+        static void BitonicSort<#= $"{m:00}" #>VAscending(<#= GenerateParamDefList(m, type) #>)
+        {
+            Vector256<<#= type #>> tmp<#= MaybeCmp() #>;
+<#      if (type == "ulong") { #>
+            var topBit = Vector256.Create(0x8000000000000000UL).AsInt64();
+<#      } #>
+            BitonicSort<#= $"{s1:00}" #>VAscending(<#= GenerateParamList(1, s1) #>);
+            BitonicSort<#= $"{s2:00}" #>VDescending(<#= GenerateParamList(s1 + 1, s2) #>);
+
+<#
+            for (var r = s1 + 1; r < m + 1; r++) {
+                var x = s1 + 1 - (r - s1); #>
+            tmp = <#= $"d{r:00}" #>;
+            <#= CrappityCrapCrap($"d{x:00}", "tmp", type)#>
+            d<#= $"{r:00}" #> = <#= GenerateMax($"d{x:00}", "tmp", type) #>;
+            d<#= $"{x:00}" #> = <#= GenerateMin($"d{x:00}", "tmp", type) #>;
+
+<#
+            } #>
+            BitonicSort<#= $"{s1:00}" #>VMergeAscending(<#= GenerateParamList(1, s1) #>);
+            BitonicSort<#= $"{s2:00}" #>VMergeAscending(<#= GenerateParamList(s1 + 1, s2) #>);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        static void BitonicSort<#= $"{m:00}" #>VDescending(<#= GenerateParamDefList(m, type) #>)
         {
             Vector256<<#= type #>> tmp<#= MaybeCmp() #>;
 <#      if (type == "ulong") { #>
@@ -224,26 +324,26 @@ namespace VxSortResearch.Unstable.SmallSort
             var topBit = Vector256.Create(0x8000000000000000UL).AsInt64();
 
 <#      } #>
-            BitonicSort<#= $"{s1:00}" #>V(<#= GenerateParamList(1, s1) #>);
-            BitonicSort<#= $"{s2:00}" #>V(<#= GenerateParamList(s1 + 1, s2) #>);
+            BitonicSort<#= $"{s1:00}" #>VDescending(<#= GenerateParamList(1, s1) #>);
+            BitonicSort<#= $"{s2:00}" #>VAscending(<#= GenerateParamList(s1 + 1, s2) #>);
 
 <#
             for (var r = s1 + 1; r < m + 1; r++) {
                 var x = s1 + 1 - (r - s1); #>
-            tmp = <#= GenerateReverse($"d{r:00}", type) #>;
+            tmp = <#= $"d{r:00}" #>;
             <#= CrappityCrapCrap($"d{x:00}", "tmp", type)#>
             d<#= $"{r:00}" #> = <#= GenerateMax($"d{x:00}", "tmp", type) #>;
             d<#= $"{x:00}" #> = <#= GenerateMin($"d{x:00}", "tmp", type) #>;
 
 <#
             } #>
-            BitonicSort<#= $"{s1:00}" #>VMerge(<#= GenerateParamList(1, s1) #>);
-            BitonicSort<#= $"{s2:00}" #>VMerge(<#= GenerateParamList(s1 + 1, s2) #>);
+            BitonicSort<#= $"{s1:00}" #>VMergeDescending(<#= GenerateParamList(1, s1) #>);
+            BitonicSort<#= $"{s2:00}" #>VMergeDescending(<#= GenerateParamList(s1 + 1, s2) #>);
         }
 <#
             if (m <= LargestMergeVariantNeeded) { #>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        static void BitonicSort<#= $"{m:00}" #>VMerge(<#= GenerateParamDefList(m, type) #>)
+        static void BitonicSort<#= $"{m:00}" #>VMergeAscending(<#= GenerateParamDefList(m, type) #>)
         {
             Vector256<<#= type #>> tmp<#= MaybeCmp() #>;
 <#      if (type == "ulong") { #>
@@ -261,8 +361,30 @@ namespace VxSortResearch.Unstable.SmallSort
 
 <#
     } #>
-            BitonicSort<#= $"{s1:00}" #>VMerge(<#= GenerateParamList(1, s1) #>);
-            BitonicSort<#= $"{s2:00}" #>VMerge(<#= GenerateParamList(s1 + 1, s2) #>);
+            BitonicSort<#= $"{s1:00}" #>VMergeAscending(<#= GenerateParamList(1, s1) #>);
+            BitonicSort<#= $"{s2:00}" #>VMergeAscending(<#= GenerateParamList(s1 + 1, s2) #>);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        static void BitonicSort<#= $"{m:00}" #>VMergeDescending(<#= GenerateParamDefList(m, type) #>)
+        {
+            Vector256<<#= type #>> tmp<#= MaybeCmp() #>;
+
+<#      if (type == "ulong") { #>
+            var topBit = Vector256.Create(0x8000000000000000UL).AsInt64();
+<#      } #>
+<#
+    for (var r = s1 + 1; r < m + 1; r++) {
+        var x = (r - s1); #>
+            tmp = d<#= $"{x:00}" #>;
+            <#= CrappityCrapCrap($"d{r:00}", $"d{x:00}", type)#>
+            d<#= $"{x:00}" #> = <#= GenerateMin($"d{r:00}", $"d{x:00}", type) #>;
+            <#= CrappityCrapCrap($"d{r:00}", "tmp", type)#>
+            d<#= $"{r:00}" #> = <#= GenerateMax($"d{r:00}", "tmp", type) #>;
+
+<#
+    } #>
+            BitonicSort<#= $"{s1:00}" #>VMergeDescending(<#= GenerateParamList(1, s1) #>);
+            BitonicSort<#= $"{s2:00}" #>VMergeDescending(<#= GenerateParamList(s1 + 1, s2) #>);
         }
 <#
             } #>
@@ -286,7 +408,7 @@ namespace VxSortResearch.Unstable.SmallSort
             var d<#= $"{l + 1:00}" #> = <#= loadIntrinsic #>(ptr + <#= $"{l:00}" #>*N);
 <#  } #>
 
-            BitonicSort<#= $"{m:00}" #>V(<#= GenerateParamList(1, m) #>);
+            BitonicSort<#= $"{m:00}" #>VAscending(<#= GenerateParamList(1, m) #>);
 
 <#  for (var l = 0; l < m; l++) { #>
             Store(ptr + <#= $"{l:00}" #>*N, d<#= $"{l + 1:00}" #>);

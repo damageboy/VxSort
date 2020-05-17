@@ -151,6 +151,9 @@ namespace VxSort
             // 2 x amount of maximal bytes needed for alignment (32)
             // 8 more elements since we write with 8-way stores from both ends of the temporary area
             //   and we must make sure to accidentaly over-write from left -> right or vice-versa right on that edge...
+            // In other words, while we allocated this much temp memory, the actual amount of elements inside said memory
+            // is smaller by 8 elements + 1 for each alignmet (max alignment is actuall 7, I just round up to 8...)
+            // so maximal numbers of elements inside temporary memory is smaller by 10..
             const int PARTITION_TMP_SIZE_IN_ELEMENTS = (int) (2 * SLACK_PER_SIDE_IN_ELEMENTS + 2 * ALIGN / sizeof(int) + V256_N);
 
             const long REALIGN_LEFT = 0x666;
@@ -497,7 +500,7 @@ namespace VxSort
 
                 while (readLeft < readRight) {
                     int* nextPtr;
-                    if ((byte *) writeRight - (byte *) readRight  < (2*SLACK_PER_SIDE_IN_ELEMENTS - N)*sizeof(int)) {
+                    if ((byte *) writeRight - (byte *) readRight  < (2*SLACK_PER_SIDE_IN_ELEMENTS - N) * sizeof(int)) {
                         nextPtr   =  readRight;
                         readRight -= SLACK_PER_SIDE_IN_ELEMENTS;
                     } else {
@@ -603,7 +606,7 @@ namespace VxSort
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining|MethodImplOptions.AggressiveOptimization)]
-            static void PartitionBlock1V(Vector256<int> L0, Vector256<int> P, byte* pBase, ref int* writeLeft, ref int* writeRight)
+            static void PartitionBlock1V(Vector256<int> data, Vector256<int> pivot, byte* pBase, ref int* writeLeft, ref int* writeRight)
             {
                 // Looks kinda silly, the (ulong) (uint) thingy right?
                 // Well, it's making a yucky lemonade out of lemons is what it is.
@@ -619,9 +622,9 @@ namespace VxSort
                 // and the rest of the code is generated more cleanly.
                 // In other words, until the issue is resolved we "pay" with a 2-byte instruction for this useless cast
                 // But this helps the JIT generate slightly better code below (saving 3 bytes).
-                var m0 = (ulong) (uint) MoveMask(CompareGreaterThan(L0, P).AsSingle());
-                L0 = PermuteVar8x32(L0, GetBytePermutationAligned(pBase, m0));
-                // We make sure the last use of m0 is for this PopCount operation. Why?
+                var mask = (ulong) (uint) MoveMask(CompareGreaterThan(data, pivot).AsSingle());
+                data = PermuteVar8x32(data, GetBytePermutationAligned(pBase, mask));
+                // We make sure the last use of `mask` is for this PopCount operation. Why?
                 // Again, this is to get the best code generated on an Intel CPU. This round it's intel's fault, yay.
                 // There's a relatively well know CPU errata where POPCNT has a false dependency on the destination operand.
                 // The JIT is already aware of this, so it will clear the destination operand before emitting a POPCNT:
@@ -630,9 +633,9 @@ namespace VxSort
                 // that the JIT will emit a POPCNT X,X instruction, where X is now both the source and the destination
                 // for PopCount. This means that there is no need for clearing the destination register (it would even be
                 // an error to do so). This saves about two bytes in the instruction stream.
-                var pc = -((long) (int) PopCount(m0));
-                Store(writeLeft,  L0);
-                Store(writeRight, L0);
+                var pc = -(long) (int) PopCount(mask);
+                Store(writeLeft,  data);
+                Store(writeRight, data);
                 // I comfortably ignored having negated the PopCount result after casting to (long)
                 // The reasoning behind this is that be storing the PopCount as a negative
                 // while also expressing the pointer bumping (next two lines) in this very specific form that
@@ -646,7 +649,7 @@ namespace VxSort
                 //       for the negation operation, which will also do its share to speed things up while lowering
                 //       the native code size, yay for future me!
                 writeRight = writeRight + pc;
-                writeLeft = writeLeft + pc + V256_N;
+                writeLeft  = writeLeft  + pc + V256_N;
             }
 
             /// <summary>
@@ -702,12 +705,7 @@ namespace VxSort
                 // We do this here just in case we need to pre-align to the right
                 // We end up
                 *right = int.MaxValue;
-
-                var readLeft = left;
-                var readRight = right;
-                var writeLeft = readLeft;
-                var writeRight = readRight - N;
-
+                
                 var tmpStartLeft = _tempStart;
                 var tmpLeft = tmpStartLeft;
                 var tmpStartRight = _tempEnd;
@@ -717,6 +715,11 @@ namespace VxSort
                 var P = Vector256.Create(pivot);
                 var pBase = BytePermTableAlignedPtr;
                 tmpRight -= N;
+
+                var readLeft = left;
+                var readRight = right;
+                var writeLeft = readLeft;
+                var writeRight = readRight - N;
 
                 // the read heads always advance by 8 elements, or 32 bytes,
                 // We can spend some extra time here to align the pointers
@@ -744,8 +747,8 @@ namespace VxSort
                 var ltPopCount = PopCount(ltMask);
                 RT0 = PermuteVar8x32(RT0, GetBytePermutationAligned(pBase, rtMask));
                 LT0 = PermuteVar8x32(LT0, GetBytePermutationAligned(pBase, ltMask));
-                Avx.Store(tmpRight, RT0);
-                Avx.Store(tmpLeft, LT0);
+                Store(tmpRight, RT0);
+                Store(tmpLeft, LT0);
 
                 var rightAlignMask = ~((rightAlign - 1) >> 31);
                 var leftAlignMask = leftAlign >> 31;
@@ -754,7 +757,7 @@ namespace VxSort
                 rtPopCount = V256_N - rtPopCount;
                 readRight += (rightAlign - N) & rightAlignMask;
 
-                Avx.Store(tmpRight, LT0);
+                Store(tmpRight, LT0);
                 tmpRight -= ltPopCount & leftAlignMask;
                 ltPopCount =  V256_N - ltPopCount;
                 tmpLeft += ltPopCount & leftAlignMask;
