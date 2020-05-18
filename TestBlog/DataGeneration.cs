@@ -2,8 +2,32 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using NUnit.Framework;
+using DataGenerator = System.Func<(int[] data, int[] sortedData, string reproContext)>;
 
-namespace Test {
+
+namespace TestBlog {
+    
+    public class SortTestCaseData : TestCaseData
+    {
+        public SortTestCaseData(DataGenerator generator) : base(generator) { }
+    }
+
+    public class SortTestGenerator<T> where T : unmanaged
+    {
+        public SortTestGenerator(System.Func<(T[] data, T[] sortedData, string reproContext)> generator)
+        {
+            Generator = generator;
+        }
+
+        public Func<(T[] data, T[] sortedData, string reproContext)> Generator { get; set; }
+    }
+
+    public class GSortTestCaseData<T> : TestCaseData where T : unmanaged
+    {
+        public GSortTestCaseData(SortTestGenerator<T> generator) : base(generator) { }
+    }
+    
     /// <summary>
     /// Tests + Setup code comparing various quicksort to arraysort in terms of correctness/parity
     /// </summary>

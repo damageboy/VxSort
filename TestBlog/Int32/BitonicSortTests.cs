@@ -4,10 +4,10 @@ using System.Globalization;
 using System.Linq;
 using NUnit.Framework;
 using VxSortResearch.Unstable.SmallSort;
-using static Test.DataGeneration;
+using static TestBlog.DataGeneration;
 using DataGenerator = System.Func<(int[] data, int[] sortedData, string reproContext)>;
 
-namespace TestBlog
+namespace TestBlog.Int32
 {
     [TestFixture(typeof(int))]
     public class BitonicSortTests<T> where T : unmanaged

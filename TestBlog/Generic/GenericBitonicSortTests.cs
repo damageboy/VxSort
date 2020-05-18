@@ -3,15 +3,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.Intrinsics;
-using System.Runtime.Intrinsics.X86;
 using NUnit.Framework;
-using Test;
 using VxSortResearch.Unstable.SmallSort;
 
-using static System.Runtime.Intrinsics.X86.Avx;
-using static System.Runtime.Intrinsics.X86.Avx2;
-
-namespace TestBlog
+namespace TestBlog.Generic
 {
 
     [TestFixture(typeof(int))]

@@ -12,7 +12,7 @@ using static System.Runtime.Intrinsics.X86.Popcnt;
 using static VxSortResearch.PermutationTables.Int32.BitPermTables;
 using static VxSortResearch.Unstable.AVX2.Sad.DoublePumpOverlinedUnroll8YoDawgBitonicSort.VxSortInt32;
 
-namespace TestBlog
+namespace TestBlog.Tables
 {
     public unsafe class Int32PermutationTableTests
     {

@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
-using Test;
 using VxSortResearch.Stable.SmallSort;
-using static Test.DataGeneration;
+using static TestBlog.DataGeneration;
 using DataGenerator = System.Func<(int[] data, int[] sortedData, string reproContext)>;
 
 namespace TestBlog

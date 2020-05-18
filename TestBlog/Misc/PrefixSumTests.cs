@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.Intrinsics.X86;
 using NUnit.Framework;
 using VxSortResearch.Utils;
-using static Test.DataGeneration;
+using static TestBlog.DataGeneration;
 using DataGenerator = System.Func<(int[] data, int[] sortedData, string reproContext)>;
 
 namespace TestBlog

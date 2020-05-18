@@ -8,7 +8,7 @@ using static System.Runtime.Intrinsics.X86.Avx;
 using static System.Runtime.Intrinsics.X86.Avx2;
 using static System.Runtime.Intrinsics.X86.Popcnt;
 
-namespace TestBlog
+namespace TestBlog.Tables
 {
     public unsafe class Int64PermutationTableTests
     {
