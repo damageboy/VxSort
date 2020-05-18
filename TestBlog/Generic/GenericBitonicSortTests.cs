@@ -8,6 +8,7 @@ using VxSortResearch.Unstable.SmallSort;
 
 namespace TestBlog.Generic
 {
+    [Parallelizable(ParallelScope.All)]
 
     [TestFixture(typeof(int))]
     [TestFixture(typeof(uint))]
@@ -36,7 +37,6 @@ namespace TestBlog.Generic
             ConstantSeed.Concat(TimeSeed);
             //PreSorted.Concat(HalfMinValue).Concat(HalfMaxValue).Concat(ConstantSeed).Concat(TimeSeed);
 
-        
         [TestCaseSource(nameof(AllTests))]
         public unsafe void GenericBitonicSortTest(SortTestGenerator<T> dg)
         {
@@ -62,9 +62,8 @@ namespace TestBlog.Generic
             Assert.That(randomData, Is.Ordered,             reproContext);
             Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
         }
-        
 
-        [TestCaseSource(nameof(ConstantSeed))]
+        [TestCaseSource(nameof(AllTests))]
         public unsafe void T4GeneratedBitonicSortOptTest(SortTestGenerator<T> dg)
         {
             var (randomData, sortedData, reproContext) = dg.Generator();

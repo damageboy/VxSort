@@ -25,14 +25,14 @@ namespace VxSortResearch.Unstable.AVX2.Happy
             fixed (T* p = &array[0]) {
                 if (typeof(T) == typeof(int)) {
                     var pInt = (int*) p;
-                    var sorter = new VxSortInt32(startPtr: pInt, endPtr: pInt + array.Length - 1);
+                    var sorter = new VxSortInt32<int>(startPtr: pInt, endPtr: pInt + array.Length - 1);
                     var depthLimit = 2 * FloorLog2PlusOne(array.Length);
                     sorter.Sort(pInt, pInt + array.Length - 1, depthLimit);
                 }
 
                 if (typeof(T) == typeof(long)) {
                     var pLong = (long*) p;
-                    var sorter = new VxSortInt64(startPtr: pLong, endPtr: pLong + array.Length - 1);
+                    var sorter = new VxSortInt64<long>(startPtr: pLong, endPtr: pLong + array.Length - 1);
                     var depthLimit = 2 * FloorLog2PlusOne(array.Length);
                     sorter.Sort(pLong, pLong + array.Length - 1, depthLimit);
                 }
@@ -134,11 +134,12 @@ namespace VxSortResearch.Unstable.AVX2.Happy
 
         const int SLACK_PER_SIDE_IN_VECTORS = 1;
 
-        internal unsafe ref struct VxSortInt32
+        internal unsafe ref struct VxSortInt32<T> where T : unmanaged, IComparable<T>
         {
-            const int SLACK_PER_SIDE_IN_ELEMENTS = SLACK_PER_SIDE_IN_VECTORS * 8;
+            const int N = 8;
+            const int SLACK_PER_SIDE_IN_ELEMENTS = SLACK_PER_SIDE_IN_VECTORS * N;
             const int SMALL_SORT_THRESHOLD_ELEMENTS = 40;
-            const int TMP_SIZE_IN_ELEMENTS = 2 * SLACK_PER_SIDE_IN_ELEMENTS + 8;
+            const int TMP_SIZE_IN_ELEMENTS = 2 * SLACK_PER_SIDE_IN_ELEMENTS + N;
 
             readonly int* _startPtr,  _endPtr,
                           _tempStart, _tempEnd;
@@ -234,13 +235,12 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 Stats.BumpPartitionOperations();
                 Debug.Assert(right - left >= SLACK_PER_SIDE_IN_ELEMENTS * 2);
                 Dbg($"{nameof(VectorizedPartitionInPlace)}: [{left - _startPtr}-{right - _startPtr}]({right - left + 1})");
-                var N = Vector256<int>.Count; // treated as constant by the JIT
                 var pivot = *right;
 
                 var tmpLeft = _tempStart;
                 var tmpRight = _tempEnd - N;
 
-                var pBase = BytePermTables.BytePermTableAlignedPtr;
+                var pBase = PermutationTables.Int32.BytePermTables.BytePermTableAlignedPtr;
                 var P = Vector256.Create(pivot);
                 Trace($"pivot Vector256 is: {P}");
 
@@ -326,7 +326,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 Store(writeRight, dataVec);
                 var popCount = -(long) PopCount(mask);
                 writeRight += popCount;
-                writeLeft  += popCount + 8;
+                writeLeft  += popCount + N;
 
 #if DEBUG
                 Vector256<int> LoadDquVector256(int* address)
@@ -374,11 +374,12 @@ namespace VxSortResearch.Unstable.AVX2.Happy
 
         }
 
-        internal unsafe ref struct VxSortInt64
+        internal unsafe ref struct VxSortInt64<T> where T : unmanaged, IComparable<T>
         {
-            const int SLACK_PER_SIDE_IN_ELEMENTS = SLACK_PER_SIDE_IN_VECTORS * 4;
+            const int N = 4;
+            const int SLACK_PER_SIDE_IN_ELEMENTS = SLACK_PER_SIDE_IN_VECTORS * N;
             const int SMALL_SORT_THRESHOLD_ELEMENTS = 40;
-            const int TMP_SIZE_IN_ELEMENTS = 2 * SLACK_PER_SIDE_IN_ELEMENTS + 4;
+            const int TMP_SIZE_IN_ELEMENTS = 2 * SLACK_PER_SIDE_IN_ELEMENTS + N;
 
             readonly long* _startPtr,  _endPtr,
                           _tempStart, _tempEnd;
@@ -474,13 +475,12 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 Stats.BumpPartitionOperations();
                 Debug.Assert(right - left >= SLACK_PER_SIDE_IN_ELEMENTS * 2);
                 Dbg($"{nameof(VectorizedPartitionInPlace)}: [{left - _startPtr}-{right - _startPtr}]({right - left + 1})");
-                var N = Vector256<long>.Count; // treated as constant by the JIT
                 var pivot = *right;
 
                 var tmpLeft = _tempStart;
                 var tmpRight = _tempEnd - N;
 
-                var pBase = BytePermTables.BytePermTableAlignedPtr;
+                var pBase = PermutationTables.Int64.BytePermTables.BytePermTableAlignedPtr;
                 var P = Vector256.Create(pivot);
                 Trace($"pivot Vector256 is: {P}");
 
@@ -498,7 +498,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                     Stats.BumpVectorizedPartitionBlocks();
 
                     long* nextPtr;
-                    if ((byte *) writeRight - (byte *) readRight < N * sizeof(int)) {
+                    if (writeRight - readRight < N) {
                         nextPtr   =  readRight;
                         readRight -= N;
                     } else {
@@ -532,11 +532,11 @@ namespace VxSortResearch.Unstable.AVX2.Happy
 
                 var leftTmpSize = (uint) (int)(tmpLeft - _tempStart);
                 Trace($"Copying back tmpLeft -> [{writeLeft - left}-{writeLeft - left + leftTmpSize})");
-                Unsafe.CopyBlockUnaligned(writeLeft, _tempStart, leftTmpSize*sizeof(int));
+                Unsafe.CopyBlockUnaligned(writeLeft, _tempStart,  leftTmpSize*sizeof(long));
                 writeLeft += leftTmpSize;
                 var rightTmpSize = (uint) (int) (_tempEnd - tmpRight);
                 Trace($"Copying back tmpRight -> [{writeLeft - left}-{writeLeft - left + rightTmpSize})");
-                Unsafe.CopyBlockUnaligned(writeLeft, tmpRight, rightTmpSize*sizeof(int));
+                Unsafe.CopyBlockUnaligned(writeLeft, tmpRight, rightTmpSize*sizeof(long));
 
                 // Shove to pivot back to the boundary
                 Dbg($"Swapping pivot {*right} from [{right - left}] into [{writeLeft - left}]");
@@ -564,12 +564,12 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 // Since there is no permutevar4x64, we have to fake it with 32-bit permutation entries
                 dataVec = PermuteVar8x32(
                     dataVec.AsInt32(),
-                    BytePermTables.GetBytePermutationAligned(pBase, mask)).AsInt64();
+                      PermutationTables.Int64.BytePermTables.GetBytePermutationAligned(pBase, mask)).AsInt64();
                 Store(writeLeft,  dataVec);
                 Store(writeRight, dataVec);
                 var popCount = -(long) PopCount(mask);
                 writeRight += popCount;
-                writeLeft  += popCount + 8;
+                writeLeft  += popCount + N;
 
 #if DEBUG
                 Vector256<int> LoadDquVector256(int* address)

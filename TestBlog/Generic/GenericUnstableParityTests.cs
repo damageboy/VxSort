@@ -4,13 +4,20 @@ using System.Linq;
 using NUnit.Framework;
 using VxSortResearch.Unstable.AVX2.Happy;
 using VxSortResearch.Unstable.Scalar;
-using static TestBlog.DataGeneration;
 using DataGenerator = System.Func<(int[] data, int[] sortedData, string reproContext)>;
 
 namespace TestBlog.Generic
 {
     [Parallelizable(ParallelScope.All)]
-    public class GenericUnstableParityTests
+    [TestFixture(typeof(int))]
+    //[TestFixture(typeof(uint))]
+    //[TestFixture(typeof(float))]
+
+    [TestFixture(typeof(long))]
+    //[TestFixture(typeof(ulong))]
+    //[TestFixture(typeof(double))]
+
+    public class GenericUnstableParityTests<T> where T : unmanaged, IComparable<T>
     {
         static int NumCycles => int.Parse(Environment.GetEnvironmentVariable("NUM_CYCLES") ?? "10");
 
@@ -18,68 +25,37 @@ namespace TestBlog.Generic
 
         static readonly int[] ConstantSeeds = { 666, 333, 999, 314159 };
 
-        static IEnumerable<TestCaseData> PreSorted =>
-            from size in ArraySizes
-            from i in Enumerable.Range(0, NumCycles)
-            let realSize = size + i
-            select new SortTestCaseData(() => (Enumerable.Range(0, realSize).ToArray(), Enumerable.Range(0, realSize).ToArray(), "pre-sorted") ).SetArgDisplayNames($"S{realSize:0000000}");
-
-        static IEnumerable<TestCaseData> ReverseSorted =>
-            from size in ArraySizes
-            from i in Enumerable.Range(0, NumCycles)
-            let realSize = size + i
-            select new SortTestCaseData(() => (Enumerable.Range(0, realSize).Reverse().ToArray(), Enumerable.Range(0, realSize).ToArray(), "reverse-sorted") ).SetArgDisplayNames($"Ƨ{realSize:0000000}");
-
-        static IEnumerable<TestCaseData> HalfMinValue =>
-            from size in ArraySizes
-            from seed in ConstantSeeds
-            from i in Enumerable.Range(0, NumCycles)
-            let realSize = size + i
-            select new SortTestCaseData(() => GenerateData(realSize, seed, int.MinValue, 0.5)).SetArgDisplayNames($"{realSize:0000000}/{seed}/0.5min");
-
-        static IEnumerable<TestCaseData> HalfMaxValue =>
-            from size in ArraySizes
-            from seed in ConstantSeeds
-            from i in Enumerable.Range(0, NumCycles)
-            let realSize = size + i
-            select new SortTestCaseData(() => GenerateData(realSize, seed, int.MaxValue, 0.5)).SetArgDisplayNames($"{realSize:0000000}/{seed}/0.5max");
-
-        static IEnumerable<TestCaseData> AllOnes =>
-            from size in ArraySizes
-            from i in Enumerable.Range(0, NumCycles)
-            let realSize = size + i
-            select new SortTestCaseData(() => (Enumerable.Repeat(1, realSize).ToArray(), Enumerable.Repeat(1, realSize).ToArray(), "all-ones") ).SetArgDisplayNames($"1:{realSize:0000000}");
-
         static IEnumerable<TestCaseData> ConstantSeed =>
             from size in ArraySizes
             from seed in ConstantSeeds
             from i in Enumerable.Range(0, NumCycles)
             let realSize = size + i
-            select new SortTestCaseData(() => GenerateData(realSize, seed)).SetArgDisplayNames($"{realSize:0000000}/{seed}");
+            select new GSortTestCaseData<T>(new SortTestGenerator<T>(() => DataGeneration.GenerateData<T>(size, seed))).SetArgDisplayNames($"{typeof(T)}/{size:000}/{seed}");
 
         static IEnumerable<TestCaseData> TimeSeed =>
             from size in ArraySizes
             from i in Enumerable.Range(0, NumCycles)
             let realSize = size + i
             let seed = ((int) DateTime.Now.Ticks + i * 666) % int.MaxValue
-            select new SortTestCaseData(() => GenerateData(realSize, seed)).SetArgDisplayNames($"{realSize:0000000}/R{i}");
+            select new GSortTestCaseData<T>(new SortTestGenerator<T>(() => DataGeneration.GenerateData<T>(size, seed))).SetArgDisplayNames($"{typeof(T)}/{size:000}/R{i}");
 
         static IEnumerable<TestCaseData> AllTests =>
-            PreSorted.Concat(ReverseSorted).Concat(HalfMinValue).Concat(HalfMaxValue).Concat(AllOnes).Concat(ConstantSeed).Concat(TimeSeed);
+            ConstantSeed.Concat(TimeSeed);    
+            //PreSorted.Concat(ReverseSorted).Concat(HalfMinValue).Concat(HalfMaxValue).Concat(AllOnes).Concat(ConstantSeed).Concat(TimeSeed);
 
         [TestCaseSource(nameof(AllTests))]
-        public void ManagedTest(DataGenerator generator)
+        public void ManagedTest(SortTestGenerator<T> dg)
         {
-            var (randomData, sortedData, reproContext) = generator();
+            var (randomData, sortedData, reproContext) = dg.Generator();
             Managed.Sort(randomData);
             Assert.That(randomData, Is.Ordered, reproContext);
             Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
         }
 
         [TestCaseSource(nameof(AllTests))]
-        public void UnmanagedTest(DataGenerator generator)
+        public void UnmanagedTest(SortTestGenerator<T> dg)
         {
-            var (randomData, sortedData, reproContext) = generator();
+            var (randomData, sortedData, reproContext) = dg.Generator();
 
             Unmanaged.Sort(randomData);
 
@@ -88,9 +64,9 @@ namespace TestBlog.Generic
         }
 
         [TestCaseSource(nameof(AllTests))]
-        public void DoublePumpJediTest(DataGenerator generator)
+        public void GenericDoublePumpJediTest(SortTestGenerator<T> dg)
         {
-            var (randomData, sortedData, reproContext) = generator();
+            var (randomData, sortedData, reproContext) = dg.Generator();
             DoublePumpJedi.Sort(randomData);
 
             Assert.That(randomData, Is.Ordered,             reproContext);

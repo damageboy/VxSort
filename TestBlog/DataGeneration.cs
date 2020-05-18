@@ -103,7 +103,8 @@ namespace TestBlog {
                     var value = (uint) r.Next();
                     return Unsafe.As<uint, T>(ref value);
                 } else if (typeof(T) == typeof(long)) {
-                    var value = (long) r.Next() << 32 | (uint) r.Next();
+                    //var value = (long) r.Next() << 32 | (uint) r.Next();
+                    var value = (long) r.Next(1000);
                     return Unsafe.As<long, T>(ref value);
                 } else if (typeof(T) == typeof(ulong)) {
                     var value = (ulong) (uint) r.Next() << 32 | (uint) r.Next();

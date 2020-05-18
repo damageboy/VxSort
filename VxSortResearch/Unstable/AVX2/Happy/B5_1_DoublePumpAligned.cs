@@ -131,9 +131,10 @@ namespace VxSortResearch.Unstable.AVX2.Happy
 
         internal unsafe ref struct VxSortInt32
         {
-            const int SLACK_PER_SIDE_IN_ELEMENTS = SLACK_PER_SIDE_IN_VECTORS * 8;
+            const int N = 8;
+            const int SLACK_PER_SIDE_IN_ELEMENTS = SLACK_PER_SIDE_IN_VECTORS * N;
             const int SMALL_SORT_THRESHOLD_ELEMENTS = 40;
-            const int TMP_SIZE_IN_ELEMENTS = (int) (2 * SLACK_PER_SIDE_IN_ELEMENTS + 8 + (2 * ALIGN) / sizeof(int));
+            const int TMP_SIZE_IN_ELEMENTS = (int) (2 * SLACK_PER_SIDE_IN_ELEMENTS + N + (2 * ALIGN) / sizeof(int));
 
             readonly int* _startPtr,  _endPtr,
                           _tempStart, _tempEnd;
@@ -236,7 +237,6 @@ namespace VxSortResearch.Unstable.AVX2.Happy
 
                 Debug.Assert((((ulong) left) & 0x3) == 0);
                 Debug.Assert((((ulong) right) & 0x3) == 0);
-                var N = Vector256<int>.Count; // treated as constant by the JIT
                 var pivot = *right;
 
                 var tmpLeft = _tempStart;
@@ -301,45 +301,20 @@ namespace VxSortResearch.Unstable.AVX2.Happy
 
                 Debug.Assert((((byte*) readRight - (byte*) readLeft) % (long) ALIGN) == 0);
                 Debug.Assert((readRight - readLeft) >= 16);
-                tmpRight -= 8;
+                tmpRight -= N;
 
                 Trace($"Post alignment [{readLeft - left}🡄🡆{readRight - left})({readRight - readLeft})");
                 Trace($"tmpLeft = {new ReadOnlySpan<int>(_tempStart, (int) (tmpLeft - _tempStart)).Dump()}");
                 Trace($"tmpRight = {new ReadOnlySpan<int>(tmpRight, (int) (_tempEnd - tmpRight)).Dump()}");
 
                 Stats.BumpVectorizedPartitionBlocks(2);
-                //PartitionBlock(readLeft  + 0 * N, P, pBase, ref tmpLeft, ref tmpRight);
-                //PartitionBlock(readRight - 1 * N, P, pBase, ref tmpLeft, ref tmpRight);
-
-                // Read ahead from left+right
-                var LT0 = LoadAlignedVector256(readLeft  + 0 * N);
-                var RT0 = LoadAlignedVector256(readRight - 1 * N);
-
-                var ltMask = (uint) MoveMask(CompareGreaterThan(LT0, P).AsSingle());
-                var rtMask = (uint) MoveMask(CompareGreaterThan(RT0, P).AsSingle());
-
-                var ltPopCount = PopCount(ltMask);
-                var rtPopCount = PopCount(rtMask);
-
-                LT0 = PermuteVar8x32(LT0, BytePermTables.GetBytePermutationAligned(pBase, ltMask));
-                RT0 = PermuteVar8x32(RT0, BytePermTables.GetBytePermutationAligned(pBase, rtMask));
-
-                Store(tmpRight, LT0);
-                tmpRight   -= ltPopCount;
-                ltPopCount =  8 - ltPopCount;
-                Store(tmpRight, RT0);
-                tmpRight   -= rtPopCount;
-                rtPopCount =  8 - rtPopCount;
-                tmpRight   += N;
+                PartitionBlock(readLeft  + 0 * N, P, pBase, ref tmpLeft, ref tmpRight);
+                PartitionBlock(readRight - 1 * N, P, pBase, ref tmpLeft, ref tmpRight);
                 Trace($"tmpRight = {new ReadOnlySpan<int>(tmpRight, (int) (_tempStart + TMP_SIZE_IN_ELEMENTS - tmpRight)).Dump()}");
-
-                Store(tmpLeft, LT0);
-                tmpLeft += ltPopCount;
-                Store(tmpLeft, RT0);
-                tmpLeft += rtPopCount;
                 Trace($"tmpLeft = {new ReadOnlySpan<int>(_tempStart, (int) (tmpLeft - _tempStart)).Dump()}");
                 Trace($"tmpRight - tmpLeft = {tmpRight - tmpLeft}");
-
+                
+                tmpRight += N;
                 readLeft  += 1 * N;
                 readRight -= 2 * N;
 

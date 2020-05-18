@@ -57,7 +57,7 @@ namespace VxSortResearch.PermutationTables.Int64
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe Vector256<int> GetBytePermutationAligned(byte * pBase, ulong index)
         {
-            Debug.Assert(index <= 255);
+            Debug.Assert(index < 16);
             Debug.Assert(pBase != null);
             Debug.Assert(((ulong) (pBase + index * 8)) % 8 == 0);
             return Avx2.ConvertToVector256Int32(pBase + index * 8);

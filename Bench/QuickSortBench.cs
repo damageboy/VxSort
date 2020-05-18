@@ -286,7 +286,19 @@ namespace Bench
 
         //[Benchmark]
         public void Unrolled8HalfDawgBitonicSort() => DoublePumpOverlinedUnroll8HalfDawgBitonicSort.Sort(_arrays[_iterationIndex++]);
-
     }
+    
+    
+    [GenericTypeArguments(typeof(int))]
+    [GenericTypeArguments(typeof(long))]
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
+    public class GenericSorting<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
+    {
+        [Benchmark(Baseline =true)]
+        public void ArraySort() => Array.Sort(_arrays[_iterationIndex++]);
 
+        [Benchmark]
+        public void DoublePumpedJedi() => DoublePumpJedi.Sort(_arrays[_iterationIndex++]);
+    }
 }
