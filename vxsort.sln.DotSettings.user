@@ -5,29 +5,17 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
   &lt;Assembly Path="/home/dmg/.nuget/packages/newtonsoft.json/12.0.3-beta2/lib/netstandard2.0/Newtonsoft.Json.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=da77ad79_002Dafe8_002D40c5_002D8106_002D6c2179c2bbf4/@EntryIndexedValue">&lt;SessionState ContinuousTestingIsOn="False" ContinuousTestingMode="0" FrameworkVersion="{x:Null}" IsLocked="False" Name="BasicBitonicOpsTests" PlatformMonoPreference="{x:Null}" PlatformType="{x:Null}" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"&gt;
-  &lt;Or&gt;
-    &lt;And&gt;
-      &lt;TestAncestor&gt;
-        &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.BasicBitonicOpsTests&lt;/TestId&gt;
-        &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;T&amp;gt;&lt;/TestId&gt;
-        &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.UnstableParityTests.DoublePumpOverlinedUnroll8BitonicSortTest&lt;/TestId&gt;
-        &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;Double&amp;gt;&lt;/TestId&gt;
-      &lt;/TestAncestor&gt;
-      &lt;Not&gt;
-        &lt;TestAncestor&gt;
-          &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.BasicBitonicOpsTests&lt;/TestId&gt;
-          &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.UnstableParityTests&lt;/TestId&gt;
-        &lt;/TestAncestor&gt;
-      &lt;/Not&gt;
-    &lt;/And&gt;
-    &lt;TestAncestor&gt;
-      &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;Int32&amp;gt;&lt;/TestId&gt;
-      &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;Int64&amp;gt;&lt;/TestId&gt;
-      &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;UInt64&amp;gt;&lt;/TestId&gt;
-    &lt;/TestAncestor&gt;
-  &lt;/Or&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=a07cc544_002D7af3_002D4efa_002Db057_002Df6adff3c0f57/@EntryIndexedValue">&lt;SessionState ContinuousTestingIsOn="False" ContinuousTestingMode="0" FrameworkVersion="{x:Null}" IsLocked="False" Name="T4GeneratedBitonicSortOptTest" PlatformMonoPreference="{x:Null}" PlatformType="{x:Null}" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;Int32&amp;gt;.T4GeneratedBitonicSortOptTest&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;UInt32&amp;gt;.T4GeneratedBitonicSortOptTest&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;Single&amp;gt;.T4GeneratedBitonicSortOptTest&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;Int64&amp;gt;.T4GeneratedBitonicSortOptTest&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;UInt64&amp;gt;.T4GeneratedBitonicSortOptTest&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::AD99202A-8E0E-4820-921D-687F2585DBB1::.NETCoreApp,Version=v3.1::TestBlog.GenericBitonicSortTests&amp;lt;Double&amp;gt;.T4GeneratedBitonicSortOptTest&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
+	
 	
 	
 	

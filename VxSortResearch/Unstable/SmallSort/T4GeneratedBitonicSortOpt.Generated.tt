@@ -1,4 +1,3 @@
-<#@ template language="C#" #>
 <#@ template debug="false" hostspecific="false" language="C#" #>
 <#@ assembly name="System.Core" #>
 <#@ import namespace="System.Linq" #>
@@ -305,8 +304,8 @@ namespace VxSortResearch.Unstable.SmallSort
             for (var r = s1 + 1; r < m + 1; r++) {
                 var x = s1 + 1 - (r - s1); #>
             tmp = <#= $"d{r:00}" #>;
-            <#= CrappityCrapCrap($"d{x:00}", "tmp", type)#>
-            d<#= $"{r:00}" #> = <#= GenerateMax($"d{x:00}", "tmp", type) #>;
+            <#= CrappityCrapCrap($"d{x:00}", $"d{r:00}", type)#>
+            d<#= $"{r:00}" #> = <#= GenerateMax($"d{x:00}", $"d{r:00}", type) #>;
             d<#= $"{x:00}" #> = <#= GenerateMin($"d{x:00}", "tmp", type) #>;
 
 <#
@@ -331,8 +330,8 @@ namespace VxSortResearch.Unstable.SmallSort
             for (var r = s1 + 1; r < m + 1; r++) {
                 var x = s1 + 1 - (r - s1); #>
             tmp = <#= $"d{r:00}" #>;
-            <#= CrappityCrapCrap($"d{x:00}", "tmp", type)#>
-            d<#= $"{r:00}" #> = <#= GenerateMax($"d{x:00}", "tmp", type) #>;
+            <#= CrappityCrapCrap($"d{x:00}", $"d{r:00}", type)#>
+            d<#= $"{r:00}" #> = <#= GenerateMax($"d{x:00}", $"d{r:00}", type) #>;
             d<#= $"{x:00}" #> = <#= GenerateMin($"d{x:00}", "tmp", type) #>;
 
 <#

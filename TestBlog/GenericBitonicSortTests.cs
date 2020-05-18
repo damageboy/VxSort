@@ -69,7 +69,7 @@ namespace TestBlog
         }
         
 
-        [TestCaseSource(nameof(AllTests))]
+        [TestCaseSource(nameof(ConstantSeed))]
         public unsafe void T4GeneratedBitonicSortOptTest(SortTestGenerator<T> dg)
         {
             var (randomData, sortedData, reproContext) = dg.Generator();
@@ -85,7 +85,7 @@ namespace TestBlog
 
     public class BasicBitonicOpsTests
     {
-                [Test]
+        [Test]
         [TestCase(new[] { 100L, 101L, 100L, 101L }, new[] { 100L, 101L, 100L, 101L })]
         [TestCase(new[] { 100L, 101L, 100L, 101L }, new[] { 1L, 1L, 1L, 1L })]
         [TestCase(new[] { 1L, 1L, 1L, 1L }, new[] { 100L, 101L, 100L, 101L })]
