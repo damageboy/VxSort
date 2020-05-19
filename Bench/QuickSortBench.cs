@@ -39,8 +39,8 @@ namespace Bench
         {
             SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.B, TimeUnit.Microsecond);
             AddJob(Job.MediumRun);
-            AddColumn(new TimePerNColumn());
-            AddColumn(SpeedupRatioColumn.SpeedupOfMedian);
+            //AddColumn(new TimePerNColumn());
+            //AddColumn(SpeedupRatioColumn.SpeedupOfMedian);
             //AddExporter(new DatatableJsonExporter());
             // AddDiagnoser(
             //     new DisassemblyDiagnoser(
@@ -295,10 +295,13 @@ namespace Bench
     [Config(typeof(SelectedConfig))]
     public class GenericSorting<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
     {
-        [Benchmark(Baseline =true)]
+        //[Benchmark(Baseline=true)]
         public void ArraySort() => Array.Sort(_arrays[_iterationIndex++]);
 
-        [Benchmark]
+        [Benchmark(Baseline=true)]
         public void DoublePumpedJedi() => DoublePumpJedi.Sort(_arrays[_iterationIndex++]);
+
+	    [Benchmark]
+        public void DoublePumpedOverlined() => DoublePumpOverlined.Sort(_arrays[_iterationIndex++]);
     }
 }

@@ -25,6 +25,7 @@ namespace Example
             DoublePumpMicroOpt,
             DoublePumpMicroOptCutoff_40,
             DoublePumpSimpleBranch,
+            DoublePumpJedi,
             DoublePumpAligned,
             DoublePumpOverlined,
             DoublePumpOverlinedBranchless,
@@ -72,12 +73,12 @@ namespace Example
                     var loops = totalElements / s;
                     var dups = 1;
 
-                    if (loops > 100) {
+                    if (loops > 10000) {
                         dups  = totalElements / 1000;
                         dups = Math.Min(dups, 100);
                         loops = 100;
                     }
-                    Console.Write($"Sorting {type}/{s}({dups})...");
+                    Console.Write($"Sorting {type}/{s}({loops}/{dups})...");
 
                     var arrays =
                         Enumerable.Range(seed, loops)
@@ -99,6 +100,7 @@ namespace Example
                                     case Example.DoublePumpMicroOpt:                          DoublePumpMicroOpt.Sort(orig); break;
 				    case Example.DoublePumpMicroOptCutoff_40:                 DoublePumpMicroOptCutoff_40.Sort(orig); break;
                                     case Example.DoublePumpSimpleBranch:                      DoublePumpSimpleBranch.Sort(orig); break;
+                                    case Example.DoublePumpJedi:                              DoublePumpJedi.Sort(orig); break;
                                     case Example.DoublePumpAligned:                           DoublePumpAligned.Sort(orig); break;
                                     case Example.DoublePumpOverlined:                         DoublePumpOverlined.Sort(orig); break;
                                     case Example.DoublePumpOverlinedBranchless:               DoublePumpOverlinedBranchless.Sort(orig); break;

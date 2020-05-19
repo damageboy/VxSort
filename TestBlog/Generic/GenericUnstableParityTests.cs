@@ -72,5 +72,16 @@ namespace TestBlog.Generic
             Assert.That(randomData, Is.Ordered,             reproContext);
             Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
         }
+        
+
+        [TestCaseSource(nameof(AllTests))]
+        public void DoublePumpOverlinedTest(SortTestGenerator<T> dg)
+        {
+            var (randomData, sortedData, reproContext) = dg.Generator();
+            DoublePumpOverlined.Sort(randomData);
+
+            Assert.That(randomData, Is.Ordered,             reproContext);
+            Assert.That(randomData, Is.EqualTo(sortedData), reproContext);
+        }        
     }
 }

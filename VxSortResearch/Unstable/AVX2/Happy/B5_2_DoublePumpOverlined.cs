@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
-using LocalsInit;
 using VxSortResearch.Statistics;
 using VxSortResearch.Utils;
 using static System.Runtime.Intrinsics.X86.Avx;
@@ -13,7 +12,6 @@ namespace VxSortResearch.Unstable.AVX2.Happy
 {
     using ROS = ReadOnlySpan<int>;
 
-    [LocalsInit(true)]
     public static class DoublePumpOverlined
     {
         public static unsafe void Sort<T>(T[] array) where T : unmanaged, IComparable<T>
@@ -632,7 +630,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
             private const int N = 4;
             const int SLACK_PER_SIDE_IN_ELEMENTS = SLACK_PER_SIDE_IN_VECTORS * N;
             // We allocate the amount of slack space + up-to 2 more alignment blocks
-            const int PARTITION_TMP_SIZE_IN_ELEMENTS = (int) (2 * SLACK_PER_SIDE_IN_ELEMENTS + N + (2 * ALIGN) / sizeof(long));
+            const int PARTITION_TMP_SIZE_IN_ELEMENTS = (int) (2 * SLACK_PER_SIDE_IN_ELEMENTS + N + ((2 * ALIGN) / sizeof(long)));
 
             const long REALIGN_LEFT = 0x666;
             const long REALIGN_RIGHT = 0x666_00000000;
