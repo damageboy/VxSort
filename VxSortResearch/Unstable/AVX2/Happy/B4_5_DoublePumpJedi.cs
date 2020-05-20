@@ -21,7 +21,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
             if (array == null)
                 throw new ArgumentNullException(nameof(array));
 
-            Stats.BumpSorts(nameof(DoublePumpPacked), array.Length);
+            Stats.BumpSorts(nameof(DoublePumpJedi), array.Length);
             fixed (T* p = &array[0]) {
                 if (typeof(T) == typeof(int)) {
                     var pInt = (int*) p;
@@ -244,7 +244,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 var P = Vector256.Create(pivot);
                 Trace($"pivot Vector256 is: {P}");
 
-                Stats.BumpVectorizedPartitionBlocks(2);
+                Stats.BumpPackedVectorizedPartitionBlocks(2);
                 PartitionBlock(left         , P, pBase, ref tmpLeft, ref tmpRight);
                 PartitionBlock(right - N - 1, P, pBase, ref tmpLeft, ref tmpRight);
 
@@ -255,7 +255,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
 
                 while (readRight >= readLeft) {
                     Stats.BumpScalarCompares();
-                    Stats.BumpVectorizedPartitionBlocks();
+                    Stats.BumpPackedVectorizedPartitionBlocks();
 
                     int* nextPtr;
                     if ((byte *) writeRight - (byte *) readRight < N * sizeof(int)) {

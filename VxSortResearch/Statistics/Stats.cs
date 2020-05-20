@@ -119,6 +119,15 @@ namespace VxSortResearch.Statistics
             BumpVectorizedStores(2 * n); // One for left, One for right
             BumpPermutations(n);
         }
+        
+        [Conditional("STATS")] public static void BumpPackedVectorizedPartitionBlocks(ulong n = 1)
+        {
+            BumpVectorizedLoads(n); // One for data + One for permutation
+            BumpVectorCompares(n);
+            BumpVectorizedStores(2 * n); // One for left, One for right
+            BumpPermutations(n);
+        }
+
 
         static readonly Dictionary<string, Dictionary<int, List<RawStats>>> _logs =
             new Dictionary<string, Dictionary<int, List<RawStats>>>();
