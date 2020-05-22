@@ -5,6 +5,7 @@ using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using VxSortResearch.Statistics;
 using VxSortResearch.Utils;
+using static System.Runtime.Intrinsics.X86.Sse;
 using static System.Runtime.Intrinsics.X86.Avx;
 using static System.Runtime.Intrinsics.X86.Avx2;
 
@@ -435,12 +436,14 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                     Stats.BumpVectorizedPartitionBlocks();
 
                     int* nextPtr;
-                    if (((byte *) writeRight - (byte *) readRight) < N * sizeof(int)) {
+                    if ((byte *) writeRight - (byte *) readRight < N * sizeof(int)) {
                         nextPtr   =  readRight;
                         readRight -= N;
+                        //Sse.Prefetch1((byte *) readRight - 256);
                     } else {
                         nextPtr  =  readLeft;
                         readLeft += N;
+                        //Sse.Prefetch1((byte *) readLeft + 256);
                     }
 
                     PartitionBlock(nextPtr, P, pBase, ref writeLeft, ref writeRight);

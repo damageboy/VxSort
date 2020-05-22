@@ -39,9 +39,9 @@ namespace Bench
         {
             SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, true, SizeUnit.B, TimeUnit.Microsecond);
             AddJob(Job.MediumRun);
-            //AddColumn(new TimePerNColumn());
-            //AddColumn(SpeedupRatioColumn.SpeedupOfMedian);
-            //AddExporter(new DatatableJsonExporter());
+            AddColumn(new TimePerNColumn());
+            AddColumn(SpeedupRatioColumn.SpeedupOfMedian);
+            AddExporter(new DatatableJsonExporter());
             // AddDiagnoser(
             //     new DisassemblyDiagnoser(
             //         new DisassemblyDiagnoserConfig(
