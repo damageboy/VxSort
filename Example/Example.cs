@@ -28,7 +28,7 @@ namespace Example
             DoublePumpJedi,
             DoublePumpAligned,
             DoublePumpOverlined,
-            DoublePumpOverlinedBranchless,
+            DoublePumpBranchless,
             DoublePumpPCSort,
             DoublePumpOverlinedUnroll4PCSort,
             DoublePumpOverlinedUnroll4BitonicSort,
@@ -103,7 +103,7 @@ namespace Example
                                     case Example.DoublePumpJedi:                              DoublePumpJedi.Sort(orig); break;
                                     case Example.DoublePumpAligned:                           DoublePumpAligned.Sort(orig); break;
                                     case Example.DoublePumpOverlined:                         DoublePumpOverlined.Sort(orig); break;
-                                    case Example.DoublePumpOverlinedBranchless:               DoublePumpOverlinedBranchless.Sort(orig); break;
+                                    case Example.DoublePumpBranchless:                        DoublePumpBranchless.Sort(orig); break;
                                     case Example.DoublePumpPCSort:                            DoublePumpOverlinedPCSort.Sort(orig); break;
                                     case Example.DoublePumpOverlinedUnroll4PCSort:            DoublePumpOverlinedUnroll4PCSort.Sort(orig); break;
                                     case Example.DoublePumpOverlinedUnroll4BitonicSort:       DoublePumpOverlinedUnroll4BitonicSort.Sort(orig); break;

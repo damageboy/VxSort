@@ -173,7 +173,7 @@ namespace TestBlog.Int32
         public void DoublePumpOverlinedBranchlessTest(DataGenerator generator)
         {
             var (randomData, sortedData, reproContext) = generator();
-            DoublePumpOverlinedBranchless.Sort(randomData);
+            DoublePumpBranchless.Sort(randomData);
 
             Assert.That(randomData, Is.Ordered,             reproContext);
             Assert.That(randomData, Is.EqualTo(sortedData), reproContext);

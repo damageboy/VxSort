@@ -218,6 +218,19 @@ namespace Bench
         public void Overlined() => DoublePumpOverlined.Sort(_arrays[_iterationIndex++]);
     }
 
+
+    [GenericTypeArguments(typeof(int))] // value type
+    [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
+    [Config(typeof(SelectedConfig))]
+    public class BlogPt5_3<T> : QuickSortBenchBase<T> where T : unmanaged, IComparable<T>
+    {
+        [Benchmark(Baseline =true)]
+        public void Overlined() => DoublePumpOverlined.Sort(_arrays[_iterationIndex++]);
+
+        [Benchmark]
+        public void Branchless() => DoublePumpBranchless.Sort(_arrays[_iterationIndex++]);
+    }
+
     [GenericTypeArguments(typeof(int))] // value type
     [InvocationCount(BenchmarkConstants.InvocationsPerIterationValue)]
     [Config(typeof(SelectedConfig))]

@@ -13,7 +13,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
 {
     using ROS = ReadOnlySpan<int>;
 
-    public static class DoublePumpOverlined
+    public static class DoublePumpBranchless
     {
         public static unsafe void Sort<T>(T[] array) where T : unmanaged, IComparable<T>
         {
@@ -30,14 +30,14 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                     var depthLimit = 2 * FloorLog2PlusOne(array.Length);
                     sorter.Sort(left, left + array.Length - 1, REALIGN_BOTH, depthLimit);
                 }
-                
+
                 if (typeof(T) == typeof(long)) {
                     var left = (long*) p;
                     var sorter = new VxSortInt64<long>(startPtr: left, endPtr: left + array.Length - 1);
                     var depthLimit = 2 * FloorLog2PlusOne(array.Length);
                     sorter.Sort(left, left + array.Length - 1, REALIGN_BOTH, depthLimit);
                 }
-                
+
             }
         }
 
@@ -142,7 +142,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
         const long REALIGN_LEFT = 0x666;
         const long REALIGN_RIGHT = 0x666_00000000;
         internal const long REALIGN_BOTH = REALIGN_LEFT | REALIGN_RIGHT;
-        
+
         internal unsafe ref struct VxSortInt32<T> where T : unmanaged, IComparable<T>
         {
             private const int N = 8;
@@ -335,10 +335,10 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 // We do this here just in case we need to pre-align to the right
                 // We end up
                 *right = int.MaxValue;
-                
+
                 var P = Vector256.Create(pivot);
                 var pBase = PermutationTables.Int32.BytePermTables.BytePermTableAlignedPtr;
-                
+
                 var readLeft = left;
                 var readRight = right;
                 var writeLeft = left;
@@ -429,22 +429,27 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 // Adjust for the reading that was made above
                 readLeft  += 1*N;
                 readRight -= 2*N;
-                
+
                 Trace($"WL:{writeLeft - left}|WR:{writeRight + 8 - left}");
                 while (readRight >= readLeft) {
-                    Stats.BumpScalarCompares();
-                    Stats.BumpVectorizedPartitionBlocks();
+                    Stats.BumpPackedVectorizedPartitionBlocks();
+                    // We know that we need to read from the right side,
+                    // otherwise we read from the left side
+                    // sideMask == 0xFFFFFFFFFFFFFFFF
+                    // When right side <= left side:
+                    // sideMask == 0x0000000000000000
+                    var readRightMask = (((byte*) writeRight - (byte*) readRight - N*sizeof(int))) >> 63;
+                    var readLeftMask =  ~readRightMask;
+                    // If sideMask is 0, it means we actually should have picked the right side
+                    // This will zero out nextPtr
+                    var readRightMaybe  = (ulong) readRight & (ulong) readRightMask;
+                    var readLeftMaybe   = (ulong) readLeft  & (ulong) readLeftMask;
 
-                    int* nextPtr;
-                    if ((byte *) writeRight - (byte *) readRight < N * sizeof(int)) {
-                        nextPtr   =  readRight;
-                        readRight -= N;
-                    } else {
-                        nextPtr  =  readLeft;
-                        readLeft += N;
-                    }
+                    PartitionBlock((int *) (readLeftMaybe + readRightMaybe), P, pBase, ref writeLeft, ref writeRight);
 
-                    PartitionBlock(nextPtr, P, pBase, ref writeLeft, ref writeRight);
+                    var postFixUp = -32 & readRightMask;
+                    readRight = (int *) ((byte *) readRight + postFixUp);
+                    readLeft  = (int *) ((byte *) readLeft  + postFixUp + 32);
                 }
 
                 // 3. Copy-back the 4 registers + remainder we partitioned in the beginning
@@ -625,7 +630,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
             [Conditional("DEBUG")]
             void Trace(string d) => Console.WriteLine($"{_depth}> {d}");
         }
-        
+
         internal unsafe ref struct VxSortInt64<T> where T : unmanaged, IComparable<T>
         {
             private const int N = 4;
@@ -821,10 +826,10 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 // We do this here just in case we need to pre-align to the right
                 // We end up
                 *right = int.MaxValue;
-                
+
                 var P = Vector256.Create(pivot);
                 var pBase = PermutationTables.Int64.BytePermTables.BytePermTableAlignedPtr;
-                
+
                 var readLeft = left;
                 var readRight = right;
                 var writeLeft = left;
@@ -915,7 +920,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
                 // Adjust for the reading that was made above
                 readLeft  += 1*N;
                 readRight -= 2*N;
-                
+
                 Trace($"WL:{writeLeft - left}|WR:{writeRight + 8 - left}");
                 while (readRight >= readLeft) {
                     Stats.BumpScalarCompares();
@@ -994,7 +999,7 @@ namespace VxSortResearch.Unstable.AVX2.Happy
 
                 var dataVec = LoadAlignedVector256(dataPtr);
                 var mask = (ulong) (uint) MoveMask(CompareGreaterThan(dataVec, P).AsDouble());
-                dataVec = PermuteVar8x32(dataVec.AsInt32(), 
+                dataVec = PermuteVar8x32(dataVec.AsInt32(),
                     PermutationTables.Int64.BytePermTables.GetBytePermutationAligned(pBase, mask)).AsInt64();
                 Store(writeLeft,  dataVec);
                 Store(writeRight, dataVec);
@@ -1112,6 +1117,6 @@ namespace VxSortResearch.Unstable.AVX2.Happy
             [Conditional("DEBUG")]
             void Trace(string d) => Console.WriteLine($"{_depth}> {d}");
         }
-        
+
     }
 }
