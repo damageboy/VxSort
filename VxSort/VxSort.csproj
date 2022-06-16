@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <Title>VxSort</Title>
         <Authors>damageboy</Authors>
@@ -22,10 +22,6 @@
         <PackageIconUrl>..\vxsort.png</PackageIconUrl>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="Fody" />
-      <PackageReference Include="LocalsInit.Fody" />
-      <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" />
-      <PackageReference Include="Microsoft.CodeQuality.Analyzers" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" />
     </ItemGroup>
     <ItemGroup>

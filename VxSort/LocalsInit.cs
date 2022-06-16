@@ -1,4 +1,4 @@
-using LocalsInit;
+using System.Runtime.CompilerServices;
 
-[assembly: LocalsInit(false)]
+[module: SkipLocalsInit]
 

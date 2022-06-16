@@ -73,8 +73,6 @@ VxSort is based on the following ideas/papers:
 
 VxSort uses the following projects:
 
-* [**`Fody`**](https://github.com/Fody/Fody) by the Fody developers.
-* [**`LocalsInit.Fody`**](https://github.com/ltrzesniewski/LocalsInit.Fody/tree/master/src) for getting rid of `.locals init` by [Lucas Trzesniewski](https://github.com/ltrzesniewski)
 * The Logo `sort` by Markus from the Noun Project
 
 ## Author
