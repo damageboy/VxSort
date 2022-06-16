@@ -24,18 +24,14 @@ namespace Test {
                 Array.Sort(sorted);
             }
 
-            var reproContext = "";
+            Span<byte> hash = stackalloc byte[20];
+            SHA1.HashData(MemoryMarshal.Cast<int, byte>(new ReadOnlySpan<int>(data)), hash);
+            var dataHash = Convert.ToBase64String(hash);
+            SHA1.HashData(MemoryMarshal.Cast<int, byte>(new ReadOnlySpan<int>(sorted)), hash);
+            var sortedHash = Convert.ToBase64String(hash);
 
-            using (var sha1 = new SHA1CryptoServiceProvider()) {
-                Span<byte> hash = stackalloc byte[20];
-                sha1.TryComputeHash(MemoryMarshal.Cast<int, byte>(new ReadOnlySpan<int>(data)), hash, out _);
-                var dataHash = Convert.ToBase64String(hash);
-                sha1.TryComputeHash(MemoryMarshal.Cast<int, byte>(new ReadOnlySpan<int>(sorted)), hash, out _);
-                var sortedHash = Convert.ToBase64String(hash);
+            var reproContext = $"[{size},{seed}] -> [{dataHash},{sortedHash}]";
 
-                reproContext = $"[{size},{seed}] -> [{dataHash},{sortedHash}]";
-            } 
-            
             return (data, sorted, reproContext);
         }
     }
